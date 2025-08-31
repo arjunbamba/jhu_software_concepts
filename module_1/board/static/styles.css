@@ -1,14 +1,19 @@
-* {
+/* * {
 	box-sizing: border-box;
-  }
+}  */
   
 body {
-	font-family: sans-serif;
+	/* font-family: sans-serif;
 	font-size: 20px;
 	margin: 0 auto;
-	text-align: center;
+	text-align: center; */
+
+	font-family: "Apple Chancery", "cursive", "Garamond", "Bookman", "Palatino", "Times New Roman", serif;
+	background-color: #001E50;
+	margin: 0px;
 }
-  
+
+/* comment out unnecessary lecture reading css
 a,
 a:visited {
 	color: #007bff;
@@ -16,9 +21,10 @@ a:visited {
   
 a:hover {
 	color: #0056b3;
-}
+} 
+*/
   
-nav ul {
+/* nav ul {
 	list-style-type: none;
 	padding: 0;
 }
@@ -26,9 +32,111 @@ nav ul {
 nav ul li {
 	display: inline;
 	margin: 0 5px;
-}
+} */
   
-main {
+/* main {
 	width: 80%;
 	margin: 0 auto;
+} */
+
+
+h1, h2 {
+	text-decoration: underline;
+}
+
+#header {
+	color: #D5FEB7;
+	font-size: 3.0em;
+	text-align: center;
+	/* line-height: 500px; */
+	/* text-shadow: 0px 0px 12px #D5FEB7; */
+	border: 1px solid #001E50;
+
+}
+
+#main {
+	background-color: #2E466F;
+	width: 80%;
+	margin-left: auto;
+	margin-right: auto;
+	border: 6px solid #E4D8FB;
+}
+
+#content_col {
+	/* background-color: #2E466F; */
+	color: #D5FEB7;
+	/* width: 580px; */
+	width: 100%;
+	padding: 10px;
+	/* float: left; */
+}
+
+#bio_pic {
+	padding: 24px;
+	height: 250px;
+	width: auto;
+	float: right;
+}
+
+/* NAVIGATION BAR */
+#nav {
+	background-color: #E4D8FB;
+	position: relative;
+	z-index: 1;
+}
+#nav-wrapper {
+	width: 450px;
+	margin-left: auto;
+	margin-right: 0;
+}
+		
+#nav ul {
+	list-style: none;
+	padding: 0px;
+	margin: 0px;
+}
+
+#nav li {
+	font-size: 1.25em;
+	width: 150px; /* x3 menu options = 450px for nav wrapper */
+	height: 50px;
+	line-height: 50px;
+	float: left;
+	text-align: center;
+	border-bottom: 3px solid #FFF;
+
+	background-color: #E4D8FB;
+	position: relative;
+}
+
+#nav a {
+	display: block;
+	text-decoration: none;
+	color: gray;
+	padding: 0;
+}
+
+/* Default (inactive tab) */
+#nav li a {
+	background-color: #E4D8FB;
+	color: gray;
+	border-bottom: 3px solid #FFF;
+}
+
+/* Active tab */
+#nav li.active a {
+	background-color: #BF001F;
+	color: #D5FEB7;
+	border-bottom: 3px solid #D5FEB7;
+}
+
+/* Hover on inactive tabs = active style */
+#nav li:not(.active) a:hover {
+	background-color: #BF001F;
+	color: #D5FEB7;
+	border-bottom: 3px solid #D5FEB7;
+}
+
+.clearfloat {
+	clear: both;
 }

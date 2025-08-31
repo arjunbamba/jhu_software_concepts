@@ -7,7 +7,12 @@ def home():
     # return "Hello, Home!"
     return render_template("pages/home.html")
 
-@bp.route("/about")
-def about():
-    # return "Hello, About!"
-    return render_template("pages/about.html")
+@bp.route("/projects")
+def projects():
+    # return "Hello, Projects!"
+    return render_template("pages/projects.html")
+
+@bp.route("/contact")
+def contact():
+    # return "Hello, Contact!"
+    return render_template("pages/contact.html")

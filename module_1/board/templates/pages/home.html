@@ -1,11 +1,28 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h2>{% block title %}Home{% endblock title %}</h2>
+<div id="header">
+    <h2><strong><em>{% block title %}Home{% endblock title %}</em></strong></h2>
+</div>
 {% endblock header %}
 
 {% block content %}
-  <p>
-    Learn more about this project by visiting the <a href="{{ url_for('pages.about') }}">About page</a>.
-  </p>
+    <div id="main">
+        <div id="content_col">
+            <h2><strong><em>Arjun Bamba - Software Engineer</em></strong></h2>
+            <img src="static/IMG_4769.jpeg" alt="Arjun Bamba" id="bio_pic">
+            <p>
+                My name is Arjun, and I’m in New York City. I’m taking this course as a prerequisite for the Masters in Artificial Intelligence program.
+            </p>
+            
+            <p>
+                I have a Bachelor’s degree in Computer Science and Physics. Last I did online learning was when finishing up my undergrad in 2020-2021. I was a Software Engineer at Mastercard for the past 3 years where I led some projects involving machine learning. I had taken some Applied AI courses during my undergraduate studies, so it’s been something that I’ve wanted to explore.
+            </p>
+            
+            <p>
+                A fun fact about me - I love trying new places to eat in the city, and I have roughly 170 bookmarked restaurants in nyc on google maps. I also really enjoy cooking at home, and I’m always learning new recipes - highly recommend checking out cookieandkate.com for some cool recipes!
+            </p>
+        </div>
+        <div class="clearfloat"></div>
+    </div>
 {% endblock content %}
