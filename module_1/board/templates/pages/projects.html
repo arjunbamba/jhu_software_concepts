@@ -1,9 +1,29 @@
 {% extends 'base.html' %}
 
 {% block header %}
-  <h2>{% block title %}Projects{% endblock title %}</h2>
+<div id="header">
+  <h1><strong>{% block title %}Projects{% endblock title %}</strong></h1>
+</div>
 {% endblock header %}
 
 {% block content %}
-  <p>This is a message board for friendly messages.</p>
+<div id="main">
+  <div id="content_col">
+      <p>
+        Check out projects here:
+      </p>
+      <ol>
+        <li>Module 1
+          <ul>
+            <li>Project: Assignment 1, Personal Website</li>
+            <li>Details: This project involved making a personal portfolio website including three pages consisting of introduction, projects, and contact information.</li>
+            <li>
+              Link: <a href="https://github.com/arjunbamba/jhu_software_concepts/tree/main/module_1">https://github.com/arjunbamba/jhu_software_concepts/tree/main/module_1</a>
+            </li>
+          </ul>
+        </li>
+      </ol>
+  </div>
+  <div class="clearfloat"></div>
+</div>
 {% endblock content %}
