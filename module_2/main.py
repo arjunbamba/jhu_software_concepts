@@ -12,6 +12,13 @@ def save_data(data, filename=data_file):
     return
 
 
+def load_data(filename=data_file):
+    # Loads cleaned data from json file
+    with open(filename, "r", encoding="utf-8") as f:
+        data = json.load(f)
+    return data
+
+
 def main():
     # Scrape data
     # set max_entries to desired target (default 30000 in Scraper)
@@ -35,6 +42,12 @@ def main():
     # Save Data
     save_data(cleaned_data)
     print(f"SAVED DATA: {len(cleaned_data)} entries to {data_file}")
+
+    print("")
+
+    # Load Data
+    loaded_data = load_data()
+    print(f"LOADED DATA: {len(loaded_data)} entries from {data_file}")
 
     print("")
 
