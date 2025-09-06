@@ -24,9 +24,17 @@ class Scraper:
         page = 1
         while len(self.entries) < self.max_entries:
             url = f"{self.base}&page={page}"
+            print(f"Scraping page {page}: {url} (collected {len(self.entries)}/{self.max_entries})")
 
             html = self._get_html(url)
+            if not html:
+                print("No HTML returned for URL, stopping.")
+                break
+
             page_entries = self._extract_raw_data(html)
+            if not page_entries:
+                print("No entries parsed on this page, stopping.")
+                break
 
             # Append and check count
             for e in page_entries:
@@ -36,6 +44,7 @@ class Scraper:
 
             page += 1
         
+        print(f"Finished scraping. Collected {len(self.entries)} raw entries.")
         print("")
         return self.entries         
     
