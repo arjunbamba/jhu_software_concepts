@@ -22,7 +22,7 @@ def load_data(filename=data_file):
 def main():
     # Scrape data
     # set max_entries to desired target (default 30000 in Scraper)
-    scraper = Scraper(max_entries=200)
+    scraper = Scraper(max_entries=30000)
     raw_data = scraper.scrape_data()
     print("GOT RAW DATA ENTRIES:", len(raw_data))
     if len(raw_data) > 0:

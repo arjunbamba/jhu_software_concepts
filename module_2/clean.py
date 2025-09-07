@@ -51,6 +51,86 @@ class Cleaner:
         return status, status_date
 
 
+    def _extract_term(self, meta_text):
+        # NOTE: I used online tools to make regex commands with examples so there may be some issues/mismatches
+
+        if not meta_text:
+            return ""
+        
+        match = re.search(r"(Fall|Spring|Summer|Winter)\s*(\d{4})", meta_text, re.I)
+        if match:
+            return f"{match.group(1).title()} {match.group(2)}"
+        
+        return ""
+
+
+    def _extract_origin(self, meta_text):
+        # NOTE: I used online tools to make regex commands with examples so there may be some issues/mismatches
+
+        if not meta_text:
+            return ""
+        
+        if re.search(r"\bAmerican\b", meta_text, re.I):
+            return "American"
+        elif re.search(r"\bInternational\b", meta_text, re.I):
+            return "International"
+        
+        return ""
+
+
+    def _extract_gpa(self, meta_text):
+        # NOTE: I used online tools to make regex commands with examples so there may be some issues/mismatches
+
+        if not meta_text:
+            return ""
+        
+        match = re.search(r"GPA\s*[:]*\s*([0-9]\.\d{1,2})", meta_text, re.I)
+        if match:
+            return match.group(1)
+        
+        # sometimes it shows GPA 3.50 without punctuation
+        match2 = re.search(r"GPA\s*([0-9]\.\d{1,2})", meta_text, re.I)
+        if match2:
+            return match2.group(1)
+        
+        return ""
+
+
+    def _extract_gre(self, text):
+        # NOTE: I used online tools to make regex commands with examples so there may be some issues/mismatches
+        # Extract + return (GRE, GRE_V, GRE_AW) as strings or "" from text (comments or raw meta part)
+        # GRE 330, 
+        # GRE: 330 (V: 165, Q: 165),
+        # V 165
+        # AW 4.5
+        if not text:
+            return "", "", ""
+
+        # GRE
+        gre_overall = ""
+        match1 = re.search(r"\bGRE[:\s]*([0-9]{3})\b", text, re.I)
+        if match1:
+            gre_overall = match1.group(1)
+
+        # GRE V
+        gre_v = ""
+        match2 = re.search(r"(?:V[:\s]*|Verbal[:\s]*)([0-9]{2,3})", text, re.I)
+        if match2:
+            gre_v = match2.group(1)
+        else:
+            # sometimes shown like "165 V"
+            match2b = re.search(r"\b([0-9]{2,3})\s*V\b", text, re.I)
+            if match2b:
+                gre_v = match2b.group(1)
+
+        # GRE AW
+        gre_aw = ""
+        match3 = re.search(r"(?:AW|AWA|Analytical Writing)[:\s]*([0-9]\.?\d?)", text, re.I)
+        if match3:
+            gre_aw = match3.group(1)
+
+        return gre_overall, gre_v, gre_aw
+
 
     def clean_data(self):
         cleaned = []
@@ -73,6 +153,13 @@ class Cleaner:
             # parse metadata
             meta = raw.get("meta_raw", "")
 
+            # gpa likely inside meta but can be in comment also
+            term = self._extract_term(meta)
+            origin = self._extract_origin(meta)
+            gpa = self._extract_gpa(meta) or self._extract_gpa(comments)
+
+            # extract GRE from comments + meta (comments likely)
+            gre_overall, gre_v, gre_aw = self._extract_gre(comments + " " + meta)
 
             # extract deg, but if its empty, check program_raw for any deg at the end like "Computer Science Masters"
             degree = self._clean_text(raw.get("degree_raw", ""))
@@ -94,6 +181,12 @@ class Cleaner:
                 "url": url or "",
                 "status": status or "",
                 "status_date": status_date or "",
+                "term": term or "",
+                "US/International": origin or "",
+                "GRE": gre_overall or "",
+                "GRE V": gre_v or "",
+                "GRE AW": gre_aw or "",
+                "GPA": gpa or "",
                 "Degree": degree_clean or ""
             }
 
