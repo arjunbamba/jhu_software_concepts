@@ -112,7 +112,23 @@ def run_queries(db_name, db_user, db_password, db_host, db_port):
         query9,
         query10
     ]
+    
+    for i in range(len(questions)):
+        print(f"\n{questions[i]}")
+        cursor.execute(sql_queries[i])
+        # print(cursor.fetchall())
 
+        rows = cursor.fetchall()
+        if not rows or rows[0][0] is None:
+            print("   No results found.")
+        
+        # if only one row / one colum, print scalar
+        if len(rows) == 1 and len(rows[0]) == 1:
+            print(f"   {rows[0][0]}")
+        else:
+            # print rows
+            for row in rows:
+                print("   " + " | ".join(str(val) if val is not None else "NULL" for val in row))
 
     cursor.close()
     connection.close()
