@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>{% block title %} Analysis {% endblock %}</h1>
+  {% for question, answer in question_answer.items() %}
+    <div class='course'>
+      <p>Question {{ question }} </p>
+      <p>Answer: {{ answer }}</p>
+    </div>
+  {% endfor %}
+{% endblock %}
+
+
+      

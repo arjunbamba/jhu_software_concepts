@@ -59,4 +59,11 @@ python query_data.py
 ```
 ![query_data](/module_3/Screenshot_Query_Data.jpg)
 
+### Run Flask Web App
+In terminal, navigate to: `jhu_software_concepts/module_3/homework_sample_code/course_app`
 
+Now run the app locally via: `python app.py`
+
+In your browser, go to `localhost:8080`, and you should see the following data analysis:
+
+![data_analysis](/module_3/Screenshot_Data_Analysis.jpg)
