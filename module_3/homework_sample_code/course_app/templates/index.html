@@ -2,6 +2,11 @@
 
 {% block content %}
   <h1>{% block title %} Analysis {% endblock %}</h1>
+  <form method="GET">
+    <p>
+      <button type="submit">Pull Data</button> : This updates the database by 'pulling' (i.e., fetching) the latest data from the grad cafe site.
+    </p>
+  </form>
   {% for question, answer in question_answer.items() %}
     <div class='course'>
       <p>Question {{ question }} </p>

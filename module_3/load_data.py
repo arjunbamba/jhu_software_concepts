@@ -7,8 +7,11 @@ from datetime import datetime
 # CONNECTION AND QUERY HELPERS
 # ---------------------------------
 
-# make a connection with your PostgreSQL database:
 def create_connection(db_name, db_user, db_password, db_host, db_port):
+    '''
+    Make a connection with the PostgreSQL database
+    '''
+
     connection = None
     try:
         # use psycopg.connect() to connect to a PostgreSQL server from within your Python application.
@@ -25,8 +28,11 @@ def create_connection(db_name, db_user, db_password, db_host, db_port):
     return connection
 
 
-# execute a SQL query
 def execute_query(connection, query):
+    '''
+    Execute a SQL Query
+    '''
+
     connection.autocommit = True
     cursor = connection.cursor()
     try:
@@ -41,8 +47,11 @@ def execute_query(connection, query):
 # SETUP DB + APPLICANTS TABLE
 # ---------------------------------
 
-# create a new database (gradcafe) in the PostgreSQL database server
 def setup_database(db_user, db_password, db_host, db_port):
+    '''
+    Create a new database (gradcafe) in the PostgreSQL database server
+    '''
+
     # Create a connection to a PostgreSQL database
     # Make a connection with the default database postgres
     connection = create_connection(
@@ -57,8 +66,12 @@ def setup_database(db_user, db_password, db_host, db_port):
     finally:
         connection.close()
 
-# connect to gradcafe db to create applicants table
+
 def setup_table(db_user, db_password, db_host, db_port):
+    '''
+    Connect to gradcafe db to create applicants table
+    '''
+
     # Before we execute queries on the gradcafe database, we need to connect to it
     # Establish a connection with the gradcafe database located in the postgres database server
     connection = create_connection(
@@ -91,8 +104,11 @@ def setup_table(db_user, db_password, db_host, db_port):
 # LOAD JSON DATA INTO APPLICANTS TABLE
 # ------------------------------------------------
 
-# Load cleand applicant JSON entries into applicants table
 def load_json_to_db(json_path, db_user, db_password, db_host, db_port):
+    '''
+    Load cleand applicant JSON entries into applicants table
+    '''
+
     connection = create_connection("gradcafe", db_user, db_password, db_host, db_port)
 
     insert_query = """

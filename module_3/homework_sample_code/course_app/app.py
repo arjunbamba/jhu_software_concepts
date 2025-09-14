@@ -1,6 +1,7 @@
 import os
 import psycopg
 from flask import Flask, render_template, request, url_for, redirect
+from main import main
 
 app = Flask(__name__)
 
@@ -15,31 +16,11 @@ def get_db_connection(db_name, db_user, db_password, db_host, db_port):
 	)
 	return conn
 
-@app.route('/create/', methods=('GET', 'POST'))
-def create():
-	"""A function to create a new course and add to database"""
-	if request.method == 'POST':
-		id = request.form['id']
-		name = request.form['name']
-		instructor = request.form['instructor']
-		room_number = request.form['room_number']
-		print(id, name, instructor, room_number)
-
-		conn = get_db_connection()
-		cur = conn.cursor()
-		cur.execute("""
-			INSERT INTO courses(id, name, instructor, room_number)
-			VALUES (%s, %s, %s, %s)""",
-			(id, name, instructor, room_number)
-			)
-		conn.commit()
-		cur.close()
-		conn.close()
-		return redirect(url_for('index'))
-	return render_template('create.html')
-
-@app.route('/')
-def index():
+def get_queries():
+	"""
+	Much of this is a copy of my code from query_data.py.
+	This sets up the questions and queries, and then proceeds to one-by-one execute the sql suery and the question and sql query result in a dictionary.
+	"""
 	DB_NAME = "gradcafe"
 	DB_USER = "postgres"
 	DB_PASSWORD = "abc123"
@@ -49,6 +30,7 @@ def index():
 	conn = get_db_connection(DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT)
 	cur = conn.cursor()
 	
+	# Prepare all the questions
 	questions = [
 		"1. How many entries applied for Fall 2025?",
 		"2. Percentage of entries from international students (to 2 decimal places)",
@@ -63,6 +45,7 @@ def index():
 		"10. What is the most common program applicants apply to?"
 	]
 
+	# Prepare all the sql queries corresponding to the questions
 	query1 = """
 			SELECT COUNT(*) 
 			FROM applicants
@@ -137,6 +120,7 @@ def index():
 			LIMIT 1;
 		"""
 	
+	# Make a list of the queries for easy index reference later
 	sql_queries = [
 		query1,
 		query2,
@@ -150,6 +134,7 @@ def index():
 		query10
 	]
 
+	# Execute queries one by one, and store question and corresponding answer in a dictionary to give to frontend pg
 	question_answer = {}
 	for i in range(len(questions)):
 		cur.execute(sql_queries[i])
@@ -171,19 +156,46 @@ def index():
 				answer = " | ".join(str(val) if val is not None else "NULL" for val in row)
 				question_answer[questions[i]] += answer
 				# print("   " + " | ".join(str(val) if val is not None else "NULL" for val in row))
-
-	# cur.execute("""
-	# 	SELECT * FROM courses;""")
-	# courses = cur.fetchall()
-
-	# cur.execute("""
-	# 	SELECT COUNT(*) FROM courses;""")
-	# count = cur.fetchall()
-	# print(count)
 	
 	cur.close()
 	conn.close()
+	
+	return question_answer
+
+
+@app.route('/', methods=('GET', 'POST'))
+def index():
+	question_answer = get_queries()
+
+	# if request.method == 'GET':
+	# 	# Scrape new data and merge it with existing applicant_data.json
+	# 	main()
+	
 	return render_template('index.html', question_answer=question_answer)
+
+
+@app.route('/create/', methods=('GET', 'POST'))
+def create():
+	"""A function to create a new course and add to database"""
+	if request.method == 'POST':
+		id = request.form['id']
+		name = request.form['name']
+		instructor = request.form['instructor']
+		room_number = request.form['room_number']
+		print(id, name, instructor, room_number)
+
+		conn = get_db_connection()
+		cur = conn.cursor()
+		cur.execute("""
+			INSERT INTO courses(id, name, instructor, room_number)
+			VALUES (%s, %s, %s, %s)""",
+			(id, name, instructor, room_number)
+			)
+		conn.commit()
+		cur.close()
+		conn.close()
+		return redirect(url_for('index'))
+	return render_template('create.html')
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', port=8080, debug=True)

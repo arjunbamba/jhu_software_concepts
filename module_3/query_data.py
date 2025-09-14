@@ -2,6 +2,9 @@ import psycopg
 
 
 def run_queries(db_name, db_user, db_password, db_host, db_port):
+    '''
+    Sets up the questions and queries, and then proceeds to one-by-one print the question, execute the sql suery, and print the result.
+    '''
     connection = psycopg.connect(
         dbname=db_name,
         user=db_user,
@@ -12,6 +15,7 @@ def run_queries(db_name, db_user, db_password, db_host, db_port):
 
     cursor = connection.cursor()
 
+    # Prepare all the questions
     questions = [
         "1. How many entries applied for Fall 2025?",
         "2. Percentage of entries from international students (to 2 decimal places)",
@@ -26,6 +30,7 @@ def run_queries(db_name, db_user, db_password, db_host, db_port):
         "10. What is the most common program applicants apply to?"
     ]
 
+    # Prepare all the sql queries corresponding to the questions
     query1 = """
             SELECT COUNT(*) 
             FROM applicants
@@ -100,6 +105,7 @@ def run_queries(db_name, db_user, db_password, db_host, db_port):
             LIMIT 1;
         """
     
+    # Make a list of the queries for easy index reference later
     sql_queries = [
         query1,
         query2,
@@ -113,6 +119,7 @@ def run_queries(db_name, db_user, db_password, db_host, db_port):
         query10
     ]
     
+    # Print question, execute corresponding query, and print query result
     for i in range(len(questions)):
         print(f"\n{questions[i]}")
         cursor.execute(sql_queries[i])
