@@ -161,8 +161,12 @@ def load_json_to_db(json_path, db_user, db_password, db_host, db_port):
             gre_aw = float(app["GRE AW"])
         
         degree = app.get("Degree")
-        llm_program = app.get("llm-generated-program")
-        llm_uni = app.get("llm-generated-university")
+
+        llm_program, llm_uni = "", ""
+        if app.get("llm-generated-program") and app["llm-generated-program"]:
+            llm_program = app.get("llm-generated-program")
+        if app.get("llm-generated-university") and app["llm-generated-university"]:
+            llm_uni = app.get("llm-generated-university")
 
         cursor.execute(
             insert_query,

@@ -3,7 +3,8 @@ from clean import Cleaner
 import json
 import os
 
-data_file = "applicant_data.json"
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+data_file = os.path.join(parent_dir, "llm_extend_applicant_data.json")
 
 def save_data(data, filename=data_file):
     # Saves cleaned data into json file

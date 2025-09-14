@@ -187,7 +187,10 @@ class Cleaner:
                 "GRE V": gre_v or "",
                 "GRE AW": gre_aw or "",
                 "GPA": gpa or "",
-                "Degree": degree_clean or ""
+                "Degree": degree_clean or "",
+                # ensure consistency with existing llm_extend_applicant_data.json
+                "llm-generated-program": "",
+                "llm-generated-university": ""
             }
 
             cleaned.append(cleaned_entry)

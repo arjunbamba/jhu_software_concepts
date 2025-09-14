@@ -2,7 +2,7 @@
 
 {% block content %}
   <h1>{% block title %} Analysis {% endblock %}</h1>
-  <form method="GET">
+  <form method="POST" action="{{ url_for('index') }}">
     <p>
       <button type="submit">Pull Data</button> : This updates the database by 'pulling' (i.e., fetching) the latest data from the grad cafe site.
     </p>

@@ -3,6 +3,15 @@ import psycopg
 from flask import Flask, render_template, request, url_for, redirect
 from main import main
 
+import sys
+import os
+# Get path 2 levels up from current file
+parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
+sys.path.append(parent_dir)
+# Now import
+from load_data import load_json_to_db
+data_file = os.path.join(parent_dir, "llm_extend_applicant_data.json")
+
 app = Flask(__name__)
 
 def get_db_connection(db_name, db_user, db_password, db_host, db_port):
@@ -165,11 +174,33 @@ def get_queries():
 
 @app.route('/', methods=('GET', 'POST'))
 def index():
+	DB_NAME = "gradcafe"
+	DB_USER = "postgres"
+	DB_PASSWORD = "abc123"
+	DB_HOST = "localhost"
+	DB_PORT = "5432" 
+	
 	question_answer = get_queries()
+	
+	if request.method == 'POST':
+		# Scrape new data and merge it with existing llm_extend_applicant_data.json
+		main()
 
-	# if request.method == 'GET':
-	# 	# Scrape new data and merge it with existing applicant_data.json
-	# 	main()
+		# Load JSON data
+		load_json_to_db(data_file, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT)
+
+		conn = get_db_connection(DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT)
+		cur = conn.cursor()
+		cur.execute(
+			"""
+			SELECT COUNT(*) FROM applicants;
+			"""
+		)
+		print("Total applicants in DB:", cur.fetchone()[0])
+		# print(cur.fetchall())
+		cur.close()
+		conn.close()
+
 	
 	return render_template('index.html', question_answer=question_answer)
 
