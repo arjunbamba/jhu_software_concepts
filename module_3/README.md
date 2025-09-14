@@ -67,3 +67,11 @@ Now run the app locally via: `python app.py`
 In your browser, go to `localhost:8080`, and you should see the following data analysis:
 
 ![data_analysis](/module_3/Screenshot_Data_Analysis.jpg)
+
+After pulling new data, you should see the following (webpage showing success message and terminal showing total applicants going from 30,000 to 30,003 (in my case)):
+
+![data_pull](/module_3/Screenshot_Data_Pull.jpg)
+
+After updating analysis, you should see the following (webpage showing success message and (in my case) some minor changes to the analysis' answers compared to the answers before pulling in picture 1 above):
+
+![data_update](/module_3/Screenshot_Data_Update.jpg)

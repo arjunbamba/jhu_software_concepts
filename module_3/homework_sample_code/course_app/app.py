@@ -14,6 +14,10 @@ data_file = os.path.join(parent_dir, "llm_extend_applicant_data.json")
 
 app = Flask(__name__)
 
+# Global flag to track if scraping is running
+is_scraping = False
+
+
 def get_db_connection(db_name, db_user, db_password, db_host, db_port):
 	"""A function to connect to the database"""
 	conn = psycopg.connect(
@@ -174,59 +178,58 @@ def get_queries():
 
 @app.route('/', methods=('GET', 'POST'))
 def index():
+	global is_scraping
 	DB_NAME = "gradcafe"
 	DB_USER = "postgres"
 	DB_PASSWORD = "abc123"
 	DB_HOST = "localhost"
 	DB_PORT = "5432" 
-	
+
+	# Do analysis for what's already in the database, and pass the returned question_answer dict to render_template below
 	question_answer = get_queries()
-	
+
+	msg = None
+	# When user clicks pull data, this will fetch the latest data and then save it in the DB's applicants table
 	if request.method == 'POST':
-		# Scrape new data and merge it with existing llm_extend_applicant_data.json
-		main()
+		action = request.form.get("action")
+		if action == "scrape":
+			if is_scraping:
+				msg = "Scraping already in progress. Please wait..."
+			else:
+				is_scraping = True
+				try:
+					# Using modified main.py from module 2, scrape/clean new data + merge it with existing llm_extend_applicant_data.json
+					main()
 
-		# Load JSON data
-		load_json_to_db(data_file, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT)
+					# Load JSON data with new entries into applicants table
+					load_json_to_db(data_file, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT)
 
-		conn = get_db_connection(DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT)
-		cur = conn.cursor()
-		cur.execute(
-			"""
-			SELECT COUNT(*) FROM applicants;
-			"""
-		)
-		print("Total applicants in DB:", cur.fetchone()[0])
-		# print(cur.fetchall())
-		cur.close()
-		conn.close()
+					# Check if count of entries increased
+					conn = get_db_connection(DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT)
+					cur = conn.cursor()
+					cur.execute(
+						"""
+						SELECT COUNT(*) FROM applicants;
+						"""
+					)
+					print("Total applicants in DB:", cur.fetchone()[0])
 
-	
-	return render_template('index.html', question_answer=question_answer)
+					msg = "Data pulled successfully!"
+				finally:
+					is_scraping = False
+					cur.close()
+					conn.close()
+		elif action == "refresh":
+			if is_scraping:
+				msg = "Cannot update analysis: Pull Data is running."
+			else:
+				question_answer = get_queries()  # re-run queries only
+				msg = "Analysis refreshed with latest database results."
+				
+		return render_template('index.html', question_answer=question_answer, msg=msg)
 
+	return render_template('index.html', question_answer=question_answer, msg=msg)
 
-@app.route('/create/', methods=('GET', 'POST'))
-def create():
-	"""A function to create a new course and add to database"""
-	if request.method == 'POST':
-		id = request.form['id']
-		name = request.form['name']
-		instructor = request.form['instructor']
-		room_number = request.form['room_number']
-		print(id, name, instructor, room_number)
-
-		conn = get_db_connection()
-		cur = conn.cursor()
-		cur.execute("""
-			INSERT INTO courses(id, name, instructor, room_number)
-			VALUES (%s, %s, %s, %s)""",
-			(id, name, instructor, room_number)
-			)
-		conn.commit()
-		cur.close()
-		conn.close()
-		return redirect(url_for('index'))
-	return render_template('create.html')
 
 if __name__ == '__main__':
 	app.run(host='0.0.0.0', port=8080, debug=True)

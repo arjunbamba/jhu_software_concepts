@@ -106,7 +106,7 @@ def setup_table(db_user, db_password, db_host, db_port):
 
 def load_json_to_db(json_path, db_user, db_password, db_host, db_port):
     '''
-    Load cleand applicant JSON entries into applicants table
+    Load cleaned applicant JSON entries into applicants table
     '''
 
     connection = create_connection("gradcafe", db_user, db_password, db_host, db_port)
