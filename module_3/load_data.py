@@ -194,8 +194,10 @@ def load_json_to_db(json_path, db_user, db_password, db_host, db_port):
     print("JSON data loaded from scratch into empty applicants table.")
 
 
-# DRIVER FUNCTION
 def load_data():
+    """
+    This is the driver function that runs when you execute this script via `python load_data.py`
+    """
     DB_USER = "postgres"
     DB_PASSWORD = "abc123"
     DB_HOST = "localhost"

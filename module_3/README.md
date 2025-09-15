@@ -75,3 +75,7 @@ After pulling new data, you should see the following (webpage showing success me
 After updating analysis, you should see the following (webpage showing success message and (in my case) some minor changes to the analysis' answers compared to the answers before pulling in picture 1 above):
 
 ![data_update](/module_3/Screenshot_Data_Update.jpg)
+
+### Notes:
+
+- Code from module 2 modified for scraping/cleaning new entries is in `homework_sample_code/course_app/` directory. Ignore/disregard `database.py` which is given sample code that I have not utilized.

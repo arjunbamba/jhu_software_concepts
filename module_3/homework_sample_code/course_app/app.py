@@ -19,7 +19,9 @@ is_scraping = False
 
 
 def get_db_connection(db_name, db_user, db_password, db_host, db_port):
-	"""A function to connect to the database"""
+	"""
+	A function to connect to the database
+	"""
 	conn = psycopg.connect(
 		dbname=db_name,
 		user=db_user,
@@ -178,6 +180,9 @@ def get_queries():
 
 @app.route('/', methods=('GET', 'POST'))
 def index():
+	"""
+	This is the internal logic for the homepage (/) which calls get_queries to fetch dictionary of question and query answers. It also includes the driving logic for the 2 buttions: pull data and update analysis.
+	"""
 	global is_scraping
 	DB_NAME = "gradcafe"
 	DB_USER = "postgres"
@@ -185,20 +190,22 @@ def index():
 	DB_HOST = "localhost"
 	DB_PORT = "5432" 
 
-	# Do analysis for what's already in the database, and pass the returned question_answer dict to render_template below
-	question_answer = get_queries()
-
 	msg = None
+	question_answer = {}
+
 	# When user clicks pull data, this will fetch the latest data and then save it in the DB's applicants table
 	if request.method == 'POST':
 		action = request.form.get("action")
+
 		if action == "scrape":
 			if is_scraping:
-				msg = "Scraping already in progress. Please wait..."
+				msg = "Scraping already in progress. Please wait."
 			else:
 				is_scraping = True
 				try:
-					# Using modified main.py from module 2, scrape/clean new data + merge it with existing llm_extend_applicant_data.json
+					# Scrape and update database
+
+					# Using modified main.py from module 2 to scrape/clean new data + merge it with existing
 					main()
 
 					# Load JSON data with new entries into applicants table
@@ -219,14 +226,18 @@ def index():
 					is_scraping = False
 					cur.close()
 					conn.close()
+
 		elif action == "refresh":
 			if is_scraping:
 				msg = "Cannot update analysis: Pull Data is running."
 			else:
 				question_answer = get_queries()  # re-run queries only
 				msg = "Analysis refreshed with latest database results."
-				
-		return render_template('index.html', question_answer=question_answer, msg=msg)
+	
+	# If no queries have been run yet (initial GET or after scrape), fetch them
+	# Do analysis for what's in the database and pass the returned question_answer dict to render_template below
+	if not question_answer:
+		question_answer = get_queries()
 
 	return render_template('index.html', question_answer=question_answer, msg=msg)
 
