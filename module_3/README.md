@@ -64,18 +64,22 @@ In terminal, navigate to: `jhu_software_concepts/module_3/homework_sample_code/c
 
 Now run the app locally via: `python app.py`
 
+#### Data Analysis Webpage
 In your browser, go to `localhost:8080`, and you should see the following data analysis:
 
 ![data_analysis](/module_3/Screenshot_Data_Analysis.jpg)
 
+#### Pull Data
 After pulling new data, you should see the following (webpage showing success message and terminal showing total applicants going from 30,000 to 30,003 (in my case)):
 
 ![data_pull](/module_3/Screenshot_Data_Pull.jpg)
 
+#### Update Analysis
 After updating analysis, you should see the following (webpage showing success message and (in my case) some minor changes to the analysis' answers compared to the answers before pulling in picture 1 above):
 
 ![data_update](/module_3/Screenshot_Data_Update.jpg)
 
+#### Update Analysis (with Pull Data in progress)
 If you click pull data and immediately click update analysis before the pull data request completes, you should see the following (webpage stopping refresh and showing cannot refresh message because pull data is currently in progress):
 
 ![data_update_stop](/module_3/Screenshot_Data_Update_Stop.jpg)
