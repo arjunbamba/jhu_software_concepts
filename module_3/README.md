@@ -76,6 +76,11 @@ After updating analysis, you should see the following (webpage showing success m
 
 ![data_update](/module_3/Screenshot_Data_Update.jpg)
 
+If you click pull data and immediately click update analysis before the pull data request completes, you should see the following (webpage stopping refresh and showing cannot refresh message because pull data is currently in progress):
+
+![data_update_stop](/module_3/Screenshot_Data_Update_Stop.jpg)
+
 ### Notes:
 
-- Code from module 2 modified for scraping/cleaning new entries is in `homework_sample_code/course_app/` directory. Ignore/disregard `database.py` which is given sample code that I have not utilized.
+- Code from module 2 modified for scraping/cleaning only new entries is in `homework_sample_code/course_app/` directory - i.e., `main.py`, `scrape.py`, and `clean.py`. 
+- Ignore/disregard `database.py` which is given sample code that I have not utilized.
