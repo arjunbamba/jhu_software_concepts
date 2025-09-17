@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h1>{% block title %} Analysis {% endblock %}</h1>
+
+  <!-- Button container (top-right) -->
+  <div style="display: flex; justify-content: flex-end; gap: 15px; margin-bottom: 20px;">
+    <form method="POST" action="{{ url_for('index') }}">
+      <button type="submit" name="action" value="scrape">Pull Data</button>
+      <p style="font-size: 0.9em; margin-top: 5px;">
+        Click this button to fetch the newest admission results from Grad Cafe and add them to our database. This will ensure your next analysis will include the latest admission results.
+      </p>
+    </form>
+
+    <form method="POST" action="{{ url_for('index') }}">
+      <button type="submit" name="action" value="refresh">Update Analysis</button>
+      <p style="font-size: 0.9em; margin-top: 5px;">
+        Click this button to refresh the analysis with the latest admission data already in the database.
+      </p>
+    </form>
+  </div>
+  
+  <!-- Display messages (like scraping in progress) -->
+  {% if msg %}
+    <div style="padding: 10px; margin-bottom: 20px; background-color: #f0f4c3; border: 1px solid #dce775;">
+      {{ msg }}
+    </div>
+  {% endif %}
+
+  {% for question, answer in question_answer.items() %}
+    <div class='course'>
+      <p><strong>Question: {{ question }}</strong></p>
+      <p>Answer: {{ answer }}</p>
+    </div>
+  {% endfor %}
+{% endblock %}
+
+
+      
