@@ -1,0 +1,355 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Reference &mdash; jhu_module_4 1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=29a6c3e3"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="jhu_module_4 documentation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            jhu_module_4
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#module-load_data">Database Utilities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#load_data.create_connection"><code class="docutils literal notranslate"><span class="pre">create_connection()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#load_data.execute_query"><code class="docutils literal notranslate"><span class="pre">execute_query()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#load_data.load_data"><code class="docutils literal notranslate"><span class="pre">load_data()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#load_data.load_json_to_db"><code class="docutils literal notranslate"><span class="pre">load_json_to_db()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#load_data.setup_database"><code class="docutils literal notranslate"><span class="pre">setup_database()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#load_data.setup_table"><code class="docutils literal notranslate"><span class="pre">setup_table()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-query_data">Analysis Queries</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#query_data.run_queries"><code class="docutils literal notranslate"><span class="pre">run_queries()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#course-app-package">Course App Package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#application-entry-points">Application Entry Points</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#runtime-orchestration">Runtime Orchestration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#module-homework_sample_code.course_app.clean">Cleaning Pipeline</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#homework_sample_code.course_app.clean.Cleaner"><code class="docutils literal notranslate"><span class="pre">Cleaner</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#module-homework_sample_code.course_app.scrape">Scraping Pipeline</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#homework_sample_code.course_app.scrape.Scraper"><code class="docutils literal notranslate"><span class="pre">Scraper</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">jhu_module_4</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">API Reference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/api_reference.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="api-reference">
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading"></a></h1>
+<section id="module-load_data">
+<span id="database-utilities"></span><h2>Database Utilities<a class="headerlink" href="#module-load_data" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="load_data.create_connection">
+<span class="sig-prename descclassname"><span class="pre">load_data.</span></span><span class="sig-name descname"><span class="pre">create_connection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_host</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_port</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#load_data.create_connection" title="Link to this definition"></a></dt>
+<dd><p>Create a PostgreSQL connection using the supplied credentials.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>db_name</strong> (<em>str</em>) – Name of the PostgreSQL database to connect to.</p></li>
+<li><p><strong>db_user</strong> (<em>str</em>) – Database user that should be authenticated.</p></li>
+<li><p><strong>db_password</strong> (<em>str</em>) – Password associated with <code class="docutils literal notranslate"><span class="pre">db_user</span></code>.</p></li>
+<li><p><strong>db_host</strong> (<em>str</em>) – Hostname or address where the database is running.</p></li>
+<li><p><strong>db_port</strong> (<em>str</em>) – TCP port for the PostgreSQL service.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A live psycopg connection when successful, otherwise <code class="docutils literal notranslate"><span class="pre">None</span></code> when an
+<code class="xref py py-class docutils literal notranslate"><span class="pre">psycopg.OperationalError</span></code> is encountered.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>psycopg.Connection | None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="load_data.execute_query">
+<span class="sig-prename descclassname"><span class="pre">load_data.</span></span><span class="sig-name descname"><span class="pre">execute_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#load_data.execute_query" title="Link to this definition"></a></dt>
+<dd><p>Execute a raw SQL statement on the provided connection.</p>
+<p>Autocommit mode is enabled prior to execution so DDL statements take effect
+immediately.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>connection</strong> (<em>psycopg.Connection</em>) – Open database connection that will
+issue the query.</p></li>
+<li><p><strong>query</strong> (<em>str</em>) – SQL text that should be executed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="load_data.load_data">
+<span class="sig-prename descclassname"><span class="pre">load_data.</span></span><span class="sig-name descname"><span class="pre">load_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#load_data.load_data" title="Link to this definition"></a></dt>
+<dd><p>Run the full data-loading pipeline for the admissions dataset.</p>
+<p>This helper creates the database and table if needed, refreshes the
+<code class="docutils literal notranslate"><span class="pre">applicants</span></code> table from <code class="docutils literal notranslate"><span class="pre">llm_extend_applicant_data.json</span></code>, and prints a
+summary count of stored rows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="load_data.load_json_to_db">
+<span class="sig-prename descclassname"><span class="pre">load_data.</span></span><span class="sig-name descname"><span class="pre">load_json_to_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_host</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_port</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#load_data.load_json_to_db" title="Link to this definition"></a></dt>
+<dd><p>Load the cleaned applicant JSON document into the <code class="docutils literal notranslate"><span class="pre">applicants</span></code> table.</p>
+<p>The target table is truncated prior to inserting the refreshed dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>json_path</strong> (<em>str</em>) – Filesystem path to the cleaned JSON payload.</p></li>
+<li><p><strong>db_user</strong> (<em>str</em>) – Database user with insert privileges.</p></li>
+<li><p><strong>db_password</strong> (<em>str</em>) – Password for <code class="docutils literal notranslate"><span class="pre">db_user</span></code>.</p></li>
+<li><p><strong>db_host</strong> (<em>str</em>) – Hostname of the PostgreSQL server.</p></li>
+<li><p><strong>db_port</strong> (<em>str</em>) – Port exposed by the PostgreSQL server.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="load_data.setup_database">
+<span class="sig-prename descclassname"><span class="pre">load_data.</span></span><span class="sig-name descname"><span class="pre">setup_database</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_host</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_port</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#load_data.setup_database" title="Link to this definition"></a></dt>
+<dd><p>Provision the <code class="docutils literal notranslate"><span class="pre">gradcafe</span></code> database if it does not already exist.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>db_user</strong> (<em>str</em>) – Administrative PostgreSQL user.</p></li>
+<li><p><strong>db_password</strong> (<em>str</em>) – Password for <code class="docutils literal notranslate"><span class="pre">db_user</span></code>.</p></li>
+<li><p><strong>db_host</strong> (<em>str</em>) – Hostname of the PostgreSQL server.</p></li>
+<li><p><strong>db_port</strong> (<em>str</em>) – Port exposed by the PostgreSQL server.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="load_data.setup_table">
+<span class="sig-prename descclassname"><span class="pre">load_data.</span></span><span class="sig-name descname"><span class="pre">setup_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_host</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_port</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#load_data.setup_table" title="Link to this definition"></a></dt>
+<dd><p>Ensure the <code class="docutils literal notranslate"><span class="pre">applicants</span></code> table exists inside <code class="docutils literal notranslate"><span class="pre">gradcafe</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>db_user</strong> (<em>str</em>) – PostgreSQL user with permissions to create tables.</p></li>
+<li><p><strong>db_password</strong> (<em>str</em>) – Password for <code class="docutils literal notranslate"><span class="pre">db_user</span></code>.</p></li>
+<li><p><strong>db_host</strong> (<em>str</em>) – Hostname of the PostgreSQL server.</p></li>
+<li><p><strong>db_port</strong> (<em>str</em>) – Port exposed by the PostgreSQL server.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-query_data">
+<span id="analysis-queries"></span><h2>Analysis Queries<a class="headerlink" href="#module-query_data" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="query_data.run_queries">
+<span class="sig-prename descclassname"><span class="pre">query_data.</span></span><span class="sig-name descname"><span class="pre">run_queries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_host</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_port</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#query_data.run_queries" title="Link to this definition"></a></dt>
+<dd><p>Execute the canned analysis queries and print their results.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>db_name</strong> (<em>str</em>) – Name of the database containing the <code class="docutils literal notranslate"><span class="pre">applicants</span></code> table.</p></li>
+<li><p><strong>db_user</strong> (<em>str</em>) – Database user that should be authenticated.</p></li>
+<li><p><strong>db_password</strong> (<em>str</em>) – Password associated with <code class="docutils literal notranslate"><span class="pre">db_user</span></code>.</p></li>
+<li><p><strong>db_host</strong> (<em>str</em>) – Hostname or address where the PostgreSQL instance lives.</p></li>
+<li><p><strong>db_port</strong> (<em>str</em>) – TCP port for the PostgreSQL service.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="course-app-package">
+<h2>Course App Package<a class="headerlink" href="#course-app-package" title="Link to this heading"></a></h2>
+<section id="application-entry-points">
+<h3>Application Entry Points<a class="headerlink" href="#application-entry-points" title="Link to this heading"></a></h3>
+</section>
+<section id="runtime-orchestration">
+<h3>Runtime Orchestration<a class="headerlink" href="#runtime-orchestration" title="Link to this heading"></a></h3>
+</section>
+<section id="module-homework_sample_code.course_app.clean">
+<span id="cleaning-pipeline"></span><h3>Cleaning Pipeline<a class="headerlink" href="#module-homework_sample_code.course_app.clean" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="homework_sample_code.course_app.clean.Cleaner">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">homework_sample_code.course_app.clean.</span></span><span class="sig-name descname"><span class="pre">Cleaner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#homework_sample_code.course_app.clean.Cleaner" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="homework_sample_code.course_app.clean.Cleaner.clean_data">
+<span class="sig-name descname"><span class="pre">clean_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#homework_sample_code.course_app.clean.Cleaner.clean_data" title="Link to this definition"></a></dt>
+<dd><p>Normalise the raw GradCafe entries into the application schema.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Cleaned applicant records suitable for persistence.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>list[dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-homework_sample_code.course_app.scrape">
+<span id="scraping-pipeline"></span><h3>Scraping Pipeline<a class="headerlink" href="#module-homework_sample_code.course_app.scrape" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="homework_sample_code.course_app.scrape.Scraper">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">homework_sample_code.course_app.scrape.</span></span><span class="sig-name descname"><span class="pre">Scraper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'https://www.thegradcafe.com/survey/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_entries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#homework_sample_code.course_app.scrape.Scraper" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
+<dt class="sig sig-object py" id="homework_sample_code.course_app.scrape.Scraper.scrape_data">
+<span class="sig-name descname"><span class="pre">scrape_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">existing_urls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#homework_sample_code.course_app.scrape.Scraper.scrape_data" title="Link to this definition"></a></dt>
+<dd><p>Iteratively download survey pages and return unseen applicant rows.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>existing_urls</strong> (<em>set</em><em>[</em><em>str</em><em>]</em>) – URLs that have already been ingested and
+should terminate scraping if encountered again.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>List of raw entry dictionaries extracted from the survey.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list[dict]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="jhu_module_4 documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Arjun Bamba.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
