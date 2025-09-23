@@ -55,7 +55,7 @@ Navigate to root directory: `/module_4/` and run the following:
 ```
 pytest --cov-report term-missing --cov=src
 ```
-![coverage_summary](/module_4/Screenshots/coverage_summary.jpg)
+![coverage_summary](/module_4/Screenshots/module_4/coverage_summary.jpg)
 
 ### Run all tests
 Because my coverage is not exactly 100%, the following line of code in `pytest.ini` blocks the normal test results from showing.
@@ -67,7 +67,7 @@ If you comment out the above line of code in `pytest.ini`, then you can navigate
 ```
 pytest -m "web or buttons or analysis or db or integration"
 ```
-![all_tests_summary](/module_4/Screenshots/all_tests_summary.jpg)
+![all_tests_summary](/module_4/Screenshots/module_4/all_tests_summary.jpg)
 
 ### Generate Documentation
 I have already generated, but to regenerate documentation from scratch, navigate to `docs/` and run:
@@ -77,19 +77,22 @@ make html
 
 ### View Documentation
 Navigate to `docs/build/html` to view api_reference.html.
+![Sphinx_RTD_1_DB](/module_4/Screenshots/module_4/Sphinx_RTD_1_DB.jpg)
+![Sphinx_RTD_2_Analysis](/module_4/Screenshots/module_4/Sphinx_RTD_2_Analysis.jpg)
+![Sphinx_RTD_3_App](/module_4/Screenshots/module_4/Sphinx_RTD_3_App.jpg)
 
 ## 5. Run Project
 ### Run Database Setup + Data Load
 ```
 python load_data.py
 ```
-![load_data](/module_4/Screenshots/Screenshot_Load_Data.jpg)
+![load_data](/module_4/Screenshots/module_3/Screenshot_Load_Data.jpg)
 
 ### Run Queries (to view data analysis)
 ```
 python query_data.py
 ```
-![query_data](/module_4/Screenshots/Screenshot_Query_Data.jpg)
+![query_data](/module_4/Screenshots/module_3/Screenshot_Query_Data.jpg)
 
 ### Run Flask Web App
 In terminal, navigate to: `jhu_software_concepts/module_4/src/homework_sample_code/course_app`
@@ -99,22 +102,22 @@ Now run the app locally via: `python app.py`
 #### Data Analysis Webpage
 In your browser, go to `localhost:8080`, and you should see the following data analysis:
 
-![data_analysis](/module_4/Screenshots/Screenshot_Data_Analysis.jpg)
+![data_analysis](/module_4/Screenshots/module_3/Screenshot_Data_Analysis.jpg)
 
 #### Pull Data
 After pulling new data, you should see the following (webpage showing success message and terminal showing total applicants going from 30,000 to 30,003 (in my case)):
 
-![data_pull](/module_4/Screenshots/Screenshot_Data_Pull.jpg)
+![data_pull](/module_4/Screenshots/module_3/Screenshot_Data_Pull.jpg)
 
 #### Update Analysis
 After updating analysis, you should see the following (webpage showing success message and (in my case) some minor changes to the analysis' answers compared to the answers before pulling in picture 1 above):
 
-![data_update](/module_4/Screenshots/Screenshot_Data_Update.jpg)
+![data_update](/module_4/Screenshots/module_3/Screenshot_Data_Update.jpg)
 
 #### Update Analysis (with Pull Data in progress)
 If you click pull data and immediately click update analysis before the pull data request completes, you should see the following (webpage stopping refresh and showing cannot refresh message because pull data is currently in progress):
 
-![data_update_stop](/module_4/Screenshots/Screenshot_Data_Update_Stop.jpg)
+![data_update_stop](/module_4/Screenshots/module_3/Screenshot_Data_Update_Stop.jpg)
 
 ### Notes:
 
