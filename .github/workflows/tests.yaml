@@ -44,4 +44,4 @@ jobs:
 
       - name: Run pytest
         working-directory: module_4
-        run: pytest
+        run: pytest --cov-report term-missing --cov=src
