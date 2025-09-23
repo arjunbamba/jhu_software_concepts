@@ -85,7 +85,7 @@ Screenshots locally:
 ![Sphinx_RTD_2_Analysis](/module_4/Screenshots/module_4/Sphinx_RTD_2_Analysis.jpg)
 ![Sphinx_RTD_3_App](/module_4/Screenshots/module_4/Sphinx_RTD_3_App.jpg)
 
-## 5. Run Project (guidelines from module 3)
+## 5. Run Project (guidelines from mod 3)
 ### Run Database Setup + Data Load
 ```
 python load_data.py
