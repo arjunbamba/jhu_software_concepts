@@ -76,7 +76,11 @@ make html
 ```
 
 ### View Documentation
-Navigate to `docs/build/html` to view api_reference.html.
+LINK TO RTD DOC: https://jhu-software-concepts-arjun-bamba.readthedocs.io/en/latest/api_reference.html
+
+Navigate to `docs/build/html` to view `api_reference.html` source file.
+
+Screenshots locally:
 ![Sphinx_RTD_1_DB](/module_4/Screenshots/module_4/Sphinx_RTD_1_DB.jpg)
 ![Sphinx_RTD_2_Analysis](/module_4/Screenshots/module_4/Sphinx_RTD_2_Analysis.jpg)
 ![Sphinx_RTD_3_App](/module_4/Screenshots/module_4/Sphinx_RTD_3_App.jpg)
