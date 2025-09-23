@@ -11,8 +11,6 @@
       <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
 
   
-      <script src="_static/jquery.js?v=5d32c60e"></script>
-      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
       <script src="_static/documentation_options.js?v=29a6c3e3"></script>
       <script src="_static/doctools.js?v=9bcbadda"></script>
       <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
@@ -99,12 +97,12 @@
            <div itemprop="articleBody">
              
   <section id="api-reference">
-<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading"></a></h1>
+<h1>API Reference<a class="headerlink" href="#api-reference" title="Link to this heading">¶</a></h1>
 <section id="module-load_data">
-<span id="database-utilities"></span><h2>Database Utilities<a class="headerlink" href="#module-load_data" title="Link to this heading"></a></h2>
+<span id="database-utilities"></span><h2>Database Utilities<a class="headerlink" href="#module-load_data" title="Link to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="load_data.create_connection">
-<span class="sig-prename descclassname"><span class="pre">load_data.</span></span><span class="sig-name descname"><span class="pre">create_connection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_host</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_port</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#load_data.create_connection" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">load_data.</span></span><span class="sig-name descname"><span class="pre">create_connection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_host</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_port</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#load_data.create_connection" title="Link to this definition">¶</a></dt>
 <dd><p>Create a PostgreSQL connection using the supplied credentials.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -128,7 +126,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="load_data.execute_query">
-<span class="sig-prename descclassname"><span class="pre">load_data.</span></span><span class="sig-name descname"><span class="pre">execute_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#load_data.execute_query" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">load_data.</span></span><span class="sig-name descname"><span class="pre">execute_query</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">connection</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">query</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#load_data.execute_query" title="Link to this definition">¶</a></dt>
 <dd><p>Execute a raw SQL statement on the provided connection.</p>
 <p>Autocommit mode is enabled prior to execution so DDL statements take effect
 immediately.</p>
@@ -151,7 +149,7 @@ issue the query.</p></li>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="load_data.load_data">
-<span class="sig-prename descclassname"><span class="pre">load_data.</span></span><span class="sig-name descname"><span class="pre">load_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#load_data.load_data" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">load_data.</span></span><span class="sig-name descname"><span class="pre">load_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#load_data.load_data" title="Link to this definition">¶</a></dt>
 <dd><p>Run the full data-loading pipeline for the admissions dataset.</p>
 <p>This helper creates the database and table if needed, refreshes the
 <code class="docutils literal notranslate"><span class="pre">applicants</span></code> table from <code class="docutils literal notranslate"><span class="pre">llm_extend_applicant_data.json</span></code>, and prints a
@@ -168,7 +166,7 @@ summary count of stored rows.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="load_data.load_json_to_db">
-<span class="sig-prename descclassname"><span class="pre">load_data.</span></span><span class="sig-name descname"><span class="pre">load_json_to_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_host</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_port</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#load_data.load_json_to_db" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">load_data.</span></span><span class="sig-name descname"><span class="pre">load_json_to_db</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">json_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_host</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_port</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#load_data.load_json_to_db" title="Link to this definition">¶</a></dt>
 <dd><p>Load the cleaned applicant JSON document into the <code class="docutils literal notranslate"><span class="pre">applicants</span></code> table.</p>
 <p>The target table is truncated prior to inserting the refreshed dataset.</p>
 <dl class="field-list simple">
@@ -192,7 +190,7 @@ summary count of stored rows.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="load_data.setup_database">
-<span class="sig-prename descclassname"><span class="pre">load_data.</span></span><span class="sig-name descname"><span class="pre">setup_database</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_host</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_port</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#load_data.setup_database" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">load_data.</span></span><span class="sig-name descname"><span class="pre">setup_database</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_host</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_port</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#load_data.setup_database" title="Link to this definition">¶</a></dt>
 <dd><p>Provision the <code class="docutils literal notranslate"><span class="pre">gradcafe</span></code> database if it does not already exist.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -214,7 +212,7 @@ summary count of stored rows.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="load_data.setup_table">
-<span class="sig-prename descclassname"><span class="pre">load_data.</span></span><span class="sig-name descname"><span class="pre">setup_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_host</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_port</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#load_data.setup_table" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">load_data.</span></span><span class="sig-name descname"><span class="pre">setup_table</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_host</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_port</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#load_data.setup_table" title="Link to this definition">¶</a></dt>
 <dd><p>Ensure the <code class="docutils literal notranslate"><span class="pre">applicants</span></code> table exists inside <code class="docutils literal notranslate"><span class="pre">gradcafe</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -236,10 +234,10 @@ summary count of stored rows.</p>
 
 </section>
 <section id="module-query_data">
-<span id="analysis-queries"></span><h2>Analysis Queries<a class="headerlink" href="#module-query_data" title="Link to this heading"></a></h2>
+<span id="analysis-queries"></span><h2>Analysis Queries<a class="headerlink" href="#module-query_data" title="Link to this heading">¶</a></h2>
 <dl class="py function">
 <dt class="sig sig-object py" id="query_data.run_queries">
-<span class="sig-prename descclassname"><span class="pre">query_data.</span></span><span class="sig-name descname"><span class="pre">run_queries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_host</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_port</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#query_data.run_queries" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">query_data.</span></span><span class="sig-name descname"><span class="pre">run_queries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">db_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_password</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_host</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">db_port</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#query_data.run_queries" title="Link to this definition">¶</a></dt>
 <dd><p>Execute the canned analysis queries and print their results.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -262,22 +260,22 @@ summary count of stored rows.</p>
 
 </section>
 <section id="course-app-package">
-<h2>Course App Package<a class="headerlink" href="#course-app-package" title="Link to this heading"></a></h2>
+<h2>Course App Package<a class="headerlink" href="#course-app-package" title="Link to this heading">¶</a></h2>
 <section id="application-entry-points">
-<h3>Application Entry Points<a class="headerlink" href="#application-entry-points" title="Link to this heading"></a></h3>
+<h3>Application Entry Points<a class="headerlink" href="#application-entry-points" title="Link to this heading">¶</a></h3>
 </section>
 <section id="runtime-orchestration">
-<h3>Runtime Orchestration<a class="headerlink" href="#runtime-orchestration" title="Link to this heading"></a></h3>
+<h3>Runtime Orchestration<a class="headerlink" href="#runtime-orchestration" title="Link to this heading">¶</a></h3>
 </section>
 <section id="module-homework_sample_code.course_app.clean">
-<span id="cleaning-pipeline"></span><h3>Cleaning Pipeline<a class="headerlink" href="#module-homework_sample_code.course_app.clean" title="Link to this heading"></a></h3>
+<span id="cleaning-pipeline"></span><h3>Cleaning Pipeline<a class="headerlink" href="#module-homework_sample_code.course_app.clean" title="Link to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="homework_sample_code.course_app.clean.Cleaner">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">homework_sample_code.course_app.clean.</span></span><span class="sig-name descname"><span class="pre">Cleaner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#homework_sample_code.course_app.clean.Cleaner" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">homework_sample_code.course_app.clean.</span></span><span class="sig-name descname"><span class="pre">Cleaner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw_data</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#homework_sample_code.course_app.clean.Cleaner" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="homework_sample_code.course_app.clean.Cleaner.clean_data">
-<span class="sig-name descname"><span class="pre">clean_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#homework_sample_code.course_app.clean.Cleaner.clean_data" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">clean_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#homework_sample_code.course_app.clean.Cleaner.clean_data" title="Link to this definition">¶</a></dt>
 <dd><p>Normalise the raw GradCafe entries into the application schema.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
@@ -293,14 +291,14 @@ summary count of stored rows.</p>
 
 </section>
 <section id="module-homework_sample_code.course_app.scrape">
-<span id="scraping-pipeline"></span><h3>Scraping Pipeline<a class="headerlink" href="#module-homework_sample_code.course_app.scrape" title="Link to this heading"></a></h3>
+<span id="scraping-pipeline"></span><h3>Scraping Pipeline<a class="headerlink" href="#module-homework_sample_code.course_app.scrape" title="Link to this heading">¶</a></h3>
 <dl class="py class">
 <dt class="sig sig-object py" id="homework_sample_code.course_app.scrape.Scraper">
-<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">homework_sample_code.course_app.scrape.</span></span><span class="sig-name descname"><span class="pre">Scraper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'https://www.thegradcafe.com/survey/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_entries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#homework_sample_code.course_app.scrape.Scraper" title="Link to this definition"></a></dt>
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">homework_sample_code.course_app.scrape.</span></span><span class="sig-name descname"><span class="pre">Scraper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">url</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'https://www.thegradcafe.com/survey/'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_entries</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30000</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#homework_sample_code.course_app.scrape.Scraper" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <dl class="py method">
 <dt class="sig sig-object py" id="homework_sample_code.course_app.scrape.Scraper.scrape_data">
-<span class="sig-name descname"><span class="pre">scrape_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">existing_urls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#homework_sample_code.course_app.scrape.Scraper.scrape_data" title="Link to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">scrape_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">existing_urls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#homework_sample_code.course_app.scrape.Scraper.scrape_data" title="Link to this definition">¶</a></dt>
 <dd><p>Iteratively download survey pages and return unseen applicant rows.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
