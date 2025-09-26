@@ -1,229 +1,226 @@
-from bs4 import BeautifulSoup
+"""Utilities for normalising GradCafe scraper output."""
+
+from __future__ import annotations
+
 import re
+from typing import Iterable, List, Mapping
+
+
+StatusTuple = tuple[str, str]
+
+
+def _clean_text(value: str) -> str:
+    """Collapse whitespace and strip leading/trailing spaces.
+
+    :param str value: Text to normalise.
+    :return: Cleaned string with single spaces and trimmed edges.
+    :rtype: str
+    """
+
+    if not value:
+        return ""
+    return " ".join(value.split()).strip()
+
+
+def _parse_status(status_raw: str) -> StatusTuple:
+    """Split status strings into state and optional date components.
+
+    :param str status_raw: Raw status text from the scraper output.
+    :return: Tuple containing status label and optional status date.
+    :rtype: tuple[str, str]
+    """
+
+    if not isinstance(status_raw, str):
+        return "", ""
+
+    status_raw = status_raw.strip()
+    if not status_raw:
+        return "", ""
+
+    unified = re.sub(r"wait\s*listed", "Waitlisted", status_raw, flags=re.I)
+    status_match = re.search(
+        r"\b(Accepted|Rejected|Waitlisted|Interview|Withdrawn)\b",
+        unified,
+        re.I,
+    )
+    status = status_match.group(1).title() if status_match else unified
+
+    date_match = re.search(r"on\s*([\w\d\s,]+)", unified, re.I)
+    status_date = date_match.group(1).strip() if date_match else ""
+
+    return status.strip(), status_date
+
+
+def _extract_term(meta_text: str) -> str:
+    """Identify the admission term when present.
+
+    :param str meta_text: Combined metadata text describing the entry.
+    :return: Formatted term string such as ``"Fall 2025"`` or ``""``.
+    :rtype: str
+    """
+
+    if not meta_text:
+        return ""
+
+    match = re.search(r"(Fall|Spring|Summer|Winter)\s*(\d{4})", meta_text, re.I)
+    return f"{match.group(1).title()} {match.group(2)}" if match else ""
+
+
+def _extract_origin(meta_text: str) -> str:
+    """Return applicant origin when labelled as American or International.
+
+    :param str meta_text: Metadata text potentially containing origin markers.
+    :return: ``"American"``, ``"International"``, or ``""`` when absent.
+    :rtype: str
+    """
+
+    if not meta_text:
+        return ""
+
+    if re.search(r"\bAmerican\b", meta_text, re.I):
+        return "American"
+    if re.search(r"\bInternational\b", meta_text, re.I):
+        return "International"
+    return ""
+
+
+def _extract_gpa(text: str) -> str:
+    """Extract GPA tokens such as ``3.80`` from free text.
+
+    :param str text: Freeform comments or metadata text.
+    :return: GPA token when detected, otherwise ``""``.
+    :rtype: str
+    """
+
+    if not text:
+        return ""
+
+    match = re.search(r"GPA\s*[:]*\s*([0-9]\.\d{1,2})", text, re.I)
+    if match:
+        return match.group(1)
+
+    match = re.search(r"GPA\s*([0-9]\.\d{1,2})", text, re.I)
+    return match.group(1) if match else ""
+
+
+def _extract_gre(text: str) -> StatusTuple:
+    """Return overall GRE and verbal scores when included in text.
+
+    :param str text: Freeform text containing GRE details.
+    :return: Tuple of total score and verbal score strings.
+    :rtype: tuple[str, str]
+    """
+
+    if not text:
+        return "", ""
+
+    gre_total = ""
+    match = re.search(r"\bGRE[:\s]*([0-9]{3})\b", text, re.I)
+    if match:
+        gre_total = match.group(1)
+
+    gre_verbal = ""
+    match = re.search(r"(?:V[:\s]*|Verbal[:\s]*)([0-9]{2,3})", text, re.I)
+    if match:
+        gre_verbal = match.group(1)
+    else:
+        match = re.search(r"\b([0-9]{2,3})\s*V\b", text, re.I)
+        if match:
+            gre_verbal = match.group(1)
+
+    return gre_total, gre_verbal
+
+
+def _extract_gre_aw(text: str) -> str:
+    """Extract GRE analytical writing values from text.
+
+    :param str text: Freeform text potentially containing AW details.
+    :return: Analytical writing score or ``""`` if not present.
+    :rtype: str
+    """
+
+    if not text:
+        return ""
+
+    match = re.search(r"(?:AW|AWA|Analytical Writing)[:\s]*([0-9]\.?\d?)", text, re.I)
+    return match.group(1) if match else ""
+
+
+def _normalise_degree(raw_program: str, raw_degree: str) -> str:
+    """Return a title-cased degree string using program fallback when needed.
+
+    :param str raw_program: Program name supplied by the scraper.
+    :param str raw_degree: Degree text supplied by the scraper.
+    :return: Normalised degree descriptor or ``""`` when unavailable.
+    :rtype: str
+    """
+
+    degree = _clean_text(raw_degree)
+    if degree:
+        return degree.title()
+
+    match = re.search(r"(Masters|PhD|MFA|MS|MA)\b", raw_program, re.I)
+    return match.group(1).title() if match else ""
+
 
 class Cleaner:
-    def __init__(self, raw_data):
-        """Initialise the cleaner with raw entries emitted by the scraper.
+    """Transform raw GradCafe scraper entries into structured applicant data."""
 
-        :param list[dict] raw_data: Unnormalised GradCafe rows captured by
-            :class:`~homework_sample_code.course_app.scrape.Scraper`.
+    def __init__(self, raw_data: Iterable[Mapping[str, str]]):
+        """Initialise the cleaner with raw scraper data.
+
+        :param Iterable raw_data: Sequence of dictionaries produced by the scraper.
         """
-        self.raw_data = raw_data
+        self.raw_data = list(raw_data)
 
-    def _clean_text(self, s):
-        """Collapse whitespace and normalise simple text blocks.
+    @staticmethod
+    def normalise_entry(raw_entry: Mapping[str, str]) -> dict:
+        """Convert a single raw record into the cleaned schema.
 
-        :param str s: Raw text segment.
-        :return: Whitespace-normalised variant of ``s``.
-        :rtype: str
-        """
-        if not s:
-            return ""
-        return " ".join(s.split()).strip()
-    
-
-    def _parse_status(self, status_raw):
-        """Split status strings into state and date components.
-
-        :param str status_raw: Raw status cell pulled from the GradCafe table.
-        :return: Tuple of normalised status and optional date text.
-        :rtype: tuple[str, str]
+        :param Mapping raw_entry: Raw GradCafe entry emitted by the scraper.
+        :return: Dictionary shaped according to the cleaned dataset schema.
+        :rtype: dict
         """
 
-        s = ""
-        if status_raw and type(status_raw) == str:
-            s = status_raw.strip()
+        normalised = {
+            key: ("" if value is None else str(value))
+            for key, value in raw_entry.items()
+        }
 
-        if not s:
-            return "", ""
-        
-        # unify "Wait listed" to be "Waitlisted"
-        s = re.sub(r"wait\s*listed", "Waitlisted", s, flags=re.I)
+        comments = _clean_text(normalised.get("comments_raw", ""))
+        meta = normalised.get("meta_raw", "")
+        combined_text = f"{comments} {meta}".strip()
 
-        # separate into status and status_date
-        # look for known status's
-        status_match = re.search(r"\b(Accepted|Rejected|Wait listed|Interview|Waitlisted|Withdrawn)\b", s, re.I)
-        status = s
-        if status_match:
-            status = status_match.group(1).title()
+        status, status_date = _parse_status(normalised.get("status_raw", ""))
+        gre_total, gre_verbal = _extract_gre(combined_text)
 
-        # extract the date after "on"
-        date_match = re.search(r"on\s*([\w\d\s,]+)", s, re.I)
-        status_date = ""
-        if date_match:
-            status_date = date_match.group(1).strip()
+        return {
+            "program": _clean_text(normalised.get("program_raw", "")),
+            "university": _clean_text(normalised.get("university_raw", "")),
+            "comments": comments,
+            "date_added": _clean_text(normalised.get("date_added_raw", "")),
+            "url": _clean_text(normalised.get("url_raw", "")),
+            "status": status,
+            "status_date": status_date,
+            "term": _extract_term(meta),
+            "US/International": _extract_origin(meta),
+            "GRE": gre_total,
+            "GRE V": gre_verbal,
+            "GRE AW": _extract_gre_aw(combined_text),
+            "GPA": _extract_gpa(meta) or _extract_gpa(combined_text),
+            "Degree": _normalise_degree(
+                normalised.get("program_raw", ""),
+                normalised.get("degree_raw", ""),
+            ),
+            "llm-generated-program": "",
+            "llm-generated-university": "",
+        }
 
-        # clean up
-        status = status.strip()
-        status_date = status_date.strip()
+    def clean_data(self) -> List[dict]:
+        """Normalise raw entries into the application schema.
 
-        return status, status_date
-
-
-    def _extract_term(self, meta_text):
-        """Read the admission term from the metadata block when present.
-
-        :param str meta_text: Concatenated metadata text for the row.
-        :return: Normalised term such as ``"Fall 2025"`` or an empty string.
-        :rtype: str
-        """
-
-        if not meta_text:
-            return ""
-        
-        match = re.search(r"(Fall|Spring|Summer|Winter)\s*(\d{4})", meta_text, re.I)
-        if match:
-            return f"{match.group(1).title()} {match.group(2)}"
-        
-        return ""
-
-
-    def _extract_origin(self, meta_text):
-        """Identify whether an applicant is domestic or international.
-
-        :param str meta_text: Concatenated metadata text for the row.
-        :return: ``"American"``, ``"International"``, or ``""`` when
-            unavailable.
-        :rtype: str
-        """
-
-        if not meta_text:
-            return ""
-        
-        if re.search(r"\bAmerican\b", meta_text, re.I):
-            return "American"
-        elif re.search(r"\bInternational\b", meta_text, re.I):
-            return "International"
-        
-        return ""
-
-
-    def _extract_gpa(self, meta_text):
-        """Extract a GPA token from metadata or comment text.
-
-        :param str meta_text: Raw metadata string associated with the row.
-        :return: GPA string (e.g., ``"3.80"``) or ``""`` when absent.
-        :rtype: str
-        """
-
-        if not meta_text:
-            return ""
-        
-        match = re.search(r"GPA\s*[:]*\s*([0-9]\.\d{1,2})", meta_text, re.I)
-        if match:
-            return match.group(1)
-        
-        # sometimes it shows GPA 3.50 without punctuation
-        match2 = re.search(r"GPA\s*([0-9]\.\d{1,2})", meta_text, re.I)
-        if match2:
-            return match2.group(1)
-        
-        return ""
-
-
-    def _extract_gre(self, text):
-        """Extract GRE overall, verbal, and writing scores from free text.
-
-        :param str text: Combined comments and metadata text.
-        :return: Tuple of overall GRE, verbal, and analytical writing values as
-            strings; each component may be ``""`` when not detected.
-        :rtype: tuple[str, str, str]
-        """
-        if not text:
-            return "", "", ""
-
-        # GRE
-        gre_overall = ""
-        match1 = re.search(r"\bGRE[:\s]*([0-9]{3})\b", text, re.I)
-        if match1:
-            gre_overall = match1.group(1)
-
-        # GRE V
-        gre_v = ""
-        match2 = re.search(r"(?:V[:\s]*|Verbal[:\s]*)([0-9]{2,3})", text, re.I)
-        if match2:
-            gre_v = match2.group(1)
-        else:
-            # sometimes shown like "165 V"
-            match2b = re.search(r"\b([0-9]{2,3})\s*V\b", text, re.I)
-            if match2b:
-                gre_v = match2b.group(1)
-
-        # GRE AW
-        gre_aw = ""
-        match3 = re.search(r"(?:AW|AWA|Analytical Writing)[:\s]*([0-9]\.?\d?)", text, re.I)
-        if match3:
-            gre_aw = match3.group(1)
-
-        return gre_overall, gre_v, gre_aw
-
-
-    def clean_data(self):
-        """Normalise the raw GradCafe entries into the application schema.
-
-        :return: Cleaned applicant records suitable for persistence.
+        :return: List of cleaned applicant dictionaries.
         :rtype: list[dict]
         """
-        cleaned = []
-        
-        # Extract raw fields for cleaning
-        for raw in self.raw_data:
 
-            # REQUIRED FIELDS 
-            program = self._clean_text(raw.get("program_raw", ""))
-            university = self._clean_text(raw.get("university_raw", ""))
-            date_added = self._clean_text(raw.get("date_added_raw", ""))
-            url = self._clean_text(raw.get("url_raw", ""))
-            
-            status_raw = raw.get("status_raw", "")
-            status, status_date = self._parse_status(status_raw)
-
-            # OPTIONAL - aka only if availabe
-            comments = self._clean_text(raw.get("comments_raw", ""))
-            
-            # parse metadata
-            meta = raw.get("meta_raw", "")
-
-            # gpa likely inside meta but can be in comment also
-            term = self._extract_term(meta)
-            origin = self._extract_origin(meta)
-            gpa = self._extract_gpa(meta) or self._extract_gpa(comments)
-
-            # extract GRE from comments + meta (comments likely)
-            gre_overall, gre_v, gre_aw = self._extract_gre(comments + " " + meta)
-
-            # extract deg, but if its empty, check program_raw for any deg at the end like "Computer Science Masters"
-            degree = self._clean_text(raw.get("degree_raw", ""))
-            if not degree:
-                match_deg = re.search(r"(Masters|PhD|MFA|MS|MA)\b", raw.get("program_raw", ""), re.I)
-                if match_deg:
-                    degree = match_deg.group(1).title()
-
-            # making the capitalzation consistent b/c so both "masters" and "MASTERS" are "Masters"
-            degree_clean = ""
-            if degree:
-                degree_clean = degree.title()
-
-            cleaned_entry = {
-                "program": program or "",
-                "university": university or "",
-                "comments": comments or "",
-                "date_added": date_added or "",
-                "url": url or "",
-                "status": status or "",
-                "status_date": status_date or "",
-                "term": term or "",
-                "US/International": origin or "",
-                "GRE": gre_overall or "",
-                "GRE V": gre_v or "",
-                "GRE AW": gre_aw or "",
-                "GPA": gpa or "",
-                "Degree": degree_clean or "",
-                # ensure consistency with existing llm_extend_applicant_data.json
-                "llm-generated-program": "",
-                "llm-generated-university": ""
-            }
-
-            cleaned.append(cleaned_entry)
-
-        return cleaned
+        return [self.normalise_entry(entry) for entry in self.raw_data]
