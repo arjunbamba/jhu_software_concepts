@@ -1,27 +1,45 @@
+"""Shared pytest fixtures and helpers for the course app test suite."""
+
+from __future__ import annotations
+
 import json
-import sys
-import textwrap
 from decimal import Decimal
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+from psycopg import sql
+
+from tests.import_utils import import_module
+from tests.query_constants import (
+    QUERY_AVG_ACCEPT_GPA,
+    QUERY_AVG_AMERICAN,
+    QUERY_AVG_SCORES,
+    QUERY_COUNT_FALL,
+    QUERY_GEORGETOWN_PHD,
+    QUERY_JHU_MS,
+    QUERY_PERCENT_ACCEPT,
+    QUERY_PERCENT_INTERNATIONAL,
+    QUERY_TOP_PROGRAM,
+    QUERY_TOP_UNIVERSITY,
+)
+
+# pylint: disable=missing-class-docstring,missing-function-docstring,too-few-public-methods,redefined-outer-name
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
-SRC_PATH = PROJECT_ROOT / "src"
-if str(SRC_PATH) not in sys.path:
-    sys.path.insert(0, str(SRC_PATH))
-
-COURSE_APP_PATH = SRC_PATH / "homework_sample_code" / "course_app"
-if str(COURSE_APP_PATH) not in sys.path:
-    sys.path.insert(0, str(COURSE_APP_PATH))
-
-import load_data
-from homework_sample_code.course_app import app as course_app_module
 
 
-def normalize_sql(query: str) -> str:
-    return " ".join(query.strip().split())
+load_data = import_module("load_data")
+course_app_module = import_module("homework_sample_code.course_app.app")
+
+
+def normalize_sql(query) -> str:
+    if isinstance(query, sql.Composable):
+        rendered = query.as_string(None)
+    else:
+        rendered = str(query)
+    cleaned = rendered.replace('"', "").strip()
+    return " ".join(cleaned.split())
 
 
 class MockDatabase:
@@ -105,124 +123,28 @@ class MockCursor:
         pass
 
 
-QUERY_COUNT_FALL = textwrap.dedent(
-    """
-    SELECT COUNT(*)
-    FROM applicants
-    WHERE term ILIKE '%Fall 2025%';
-    """
-)
-
-QUERY_PERCENT_INTERNATIONAL = textwrap.dedent(
-    """
-    SELECT
-        ROUND(
-            100.0 * COUNT(*) FILTER (WHERE us_or_international ILIKE '%International%')
-            / NULLIF(COUNT(*), 0),
-            2
-        ) AS pct_international
-    FROM applicants;
-    """
-)
-
-QUERY_AVG_SCORES = textwrap.dedent(
-    """
-    SELECT
-        ROUND(AVG(gpa)::numeric, 2) AS avg_gpa,
-        ROUND(AVG(gre)::numeric, 2) AS avg_gre,
-        ROUND(AVG(gre_v)::numeric, 2) AS avg_gre_v,
-        ROUND(AVG(gre_aw)::numeric, 2) AS avg_gre_aw
-    FROM applicants;
-    """
-)
-
-QUERY_AVG_AMERICAN = textwrap.dedent(
-    """
-    SELECT ROUND(AVG(gpa)::numeric, 2) AS avg_gpa
-    FROM applicants
-    WHERE term ILIKE '%Fall 2025%'
-      AND us_or_international ILIKE '%American%';
-    """
-)
-
-QUERY_PERCENT_ACCEPT = textwrap.dedent(
-    """
-    SELECT ROUND(
-        100.0 * COUNT(*) FILTER (WHERE status ILIKE '%Accept%')
-        / NULLIF(COUNT(*), 0),
-        2
-    ) AS pct_acceptances
-    FROM applicants
-    WHERE term ILIKE '%Fall 2025%';
-    """
-)
-
-QUERY_AVG_ACCEPT_GPA = textwrap.dedent(
-    """
-    SELECT ROUND(AVG(gpa)::numeric, 2) AS avg_gpa
-    FROM applicants
-    WHERE term ILIKE '%Fall 2025%'
-      AND status ILIKE '%Accept%';
-    """
-)
-
-QUERY_JHU_MS = textwrap.dedent(
-    """
-    SELECT COUNT(*)
-    FROM applicants
-    WHERE llm_generated_university ILIKE '%Johns Hopkins%'
-      AND llm_generated_program ILIKE '%Computer Science%'
-      AND degree ILIKE '%Master%';
-    """
-)
-
-QUERY_GEORGETOWN_PHD = textwrap.dedent(
-    """
-    SELECT COUNT(*)
-    FROM applicants
-    WHERE llm_generated_university ILIKE '%Georgetown%'
-      AND llm_generated_program ILIKE '%Computer Science%'
-      AND degree ILIKE '%PhD%'
-      AND term ILIKE '%2025%'
-      AND status ILIKE '%Accept%';
-    """
-)
-
-QUERY_TOP_UNIVERSITY = textwrap.dedent(
-    """
-    SELECT llm_generated_university, COUNT(*) AS num_apps
-    FROM applicants
-    GROUP BY llm_generated_university
-    ORDER BY num_apps DESC
-    LIMIT 1;
-    """
-)
-
-QUERY_TOP_PROGRAM = textwrap.dedent(
-    """
-    SELECT llm_generated_program, COUNT(*) AS num_apps
-    FROM applicants
-    GROUP BY llm_generated_program
-    ORDER BY num_apps DESC
-    LIMIT 1;
-    """
-)
-
 QUERY_COUNT_ALL = "SELECT COUNT(*) FROM applicants;"
 
 
 def default_analysis_script(db: MockDatabase):
     return {
-        QUERY_COUNT_FALL: [(3,)],
-        QUERY_PERCENT_INTERNATIONAL: [(Decimal("47.50"),)],
-        QUERY_AVG_SCORES: [(Decimal("3.55"), Decimal("321.00"), Decimal("159.00"), Decimal("4.20"))],
-        QUERY_AVG_AMERICAN: [(Decimal("3.60"),)],
-        QUERY_PERCENT_ACCEPT: [(Decimal("66.67"),)],
-        QUERY_AVG_ACCEPT_GPA: [(Decimal("3.75"),)],
-        QUERY_JHU_MS: [(5,)],
-        QUERY_GEORGETOWN_PHD: [(2,)],
-        QUERY_TOP_UNIVERSITY: [("Example University", 12)],
-        QUERY_TOP_PROGRAM: [("Computer Science", 20)],
+        normalize_sql(QUERY_COUNT_FALL): [(3,)],
+        normalize_sql(QUERY_PERCENT_INTERNATIONAL): [(Decimal("47.50"),)],
+        normalize_sql(QUERY_AVG_SCORES): [
+            (
+                Decimal("3.55"),
+                Decimal("321.00"),
+                Decimal("159.00"),
+                Decimal("4.20"),
+            )
+        ],
+        normalize_sql(QUERY_AVG_AMERICAN): [(Decimal("3.60"),)],
+        normalize_sql(QUERY_PERCENT_ACCEPT): [(Decimal("66.67"),)],
+        normalize_sql(QUERY_AVG_ACCEPT_GPA): [(Decimal("3.75"),)],
+        normalize_sql(QUERY_JHU_MS): [(5,)],
+        normalize_sql(QUERY_GEORGETOWN_PHD): [(2,)],
+        normalize_sql(QUERY_TOP_UNIVERSITY): [("Example University", 12)],
+        normalize_sql(QUERY_TOP_PROGRAM): [("Computer Science", 20)],
         QUERY_COUNT_ALL: lambda: [(len(db.inserted_rows),)],
     }
 
@@ -321,10 +243,10 @@ def app_env(mock_db, sample_app_data, monkeypatch, tmp_path):
 def query_db(monkeypatch):
     db = MockDatabase()
 
-    import query_data
+    query_module = import_module("query_data")
 
     def fake_connect(*_args, **_kwargs):
         return db.connect()
 
-    monkeypatch.setattr(query_data.psycopg, "connect", fake_connect)
+    monkeypatch.setattr(query_module, "connect", fake_connect)
     return db
