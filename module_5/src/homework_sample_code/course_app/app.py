@@ -1,277 +1,200 @@
-import os
-import psycopg
-from flask import Flask, render_template, request, url_for, redirect
-from main import main
+"""Flask application for browsing admissions analysis results."""
 
-import sys
-import os
-# Get path 2 levels up from current file
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
-sys.path.append(parent_dir)
-# Now import
-from load_data import load_json_to_db
-data_file = os.path.join(parent_dir, "llm_extend_applicant_data.json")
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Dict
+
+import psycopg
+from flask import Flask, render_template, request
+
+try:
+    from homework_sample_code.course_app.utils import (
+        DEFAULT_DB_CONFIG,
+        connect,
+        import_module,
+        managed_connection,
+        managed_cursor,
+    )
+except ModuleNotFoundError:  # pragma: no cover - fallback for ``python app.py``
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from homework_sample_code.course_app.utils import (
+        DEFAULT_DB_CONFIG,
+        connect,
+        import_module,
+        managed_connection,
+        managed_cursor,
+    )
+
+
+load_data = import_module("load_data")
+query_data = import_module("query_data")
+
+try:
+    from .main import main
+except ImportError:  # pragma: no cover - fallback for direct execution
+    main_module = import_module("homework_sample_code.course_app.main")
+    main = main_module.main
+
+
+QuestionAnswers = Dict[str, str]
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+load_json_to_db = load_data.load_json_to_db
+QUESTION_QUERIES = tuple(query_data.QUESTION_QUERIES)
+
+DB_CONFIG = DEFAULT_DB_CONFIG
+
+DATA_FILE = PROJECT_ROOT / "llm_extend_applicant_data.json"
+
 
 app = Flask(__name__)
 
-# Global flag to track if scraping is running
-is_scraping = False
-# Cache last analysis payload so the page can render without re-querying when busy
-# latest_analysis = {}
+is_scraping: bool = False
+latest_analysis: QuestionAnswers = {}
+data_file: str = str(DATA_FILE)
 
 
-def get_db_connection(db_name, db_user, db_password, db_host, db_port):
-	"""Create a psycopg connection using the provided credentials.
 
-	:param str db_name: Target database name.
-	:param str db_user: Database user name.
-	:param str db_password: Password for ``db_user``.
-	:param str db_host: Hostname of the database server.
-	:param str db_port: Port of the database service.
-	:return: Open database connection.
-	:rtype: psycopg.Connection
-	"""
-	conn = psycopg.connect(
-		dbname=db_name,
-		user=db_user,
-		password=db_password,
-		host=db_host,
-		port=db_port,
-	)
-	return conn
+def _set_scraping(flag: bool) -> None:
+    """Mutate the module-level ``is_scraping`` flag.
 
-def get_queries():
-	"""Compute the application analysis answers from the ``applicants`` table.
+    :param bool flag: Desired state of the scraping indicator.
+    :return: ``None``
+    :rtype: None
+    """
 
-	:return: Mapping of formatted question text to the associated answer string.
-	:rtype: dict[str, str]
-	"""
-	DB_NAME = "gradcafe"
-	DB_USER = "postgres"
-	DB_PASSWORD = "abc123"
-	DB_HOST = "localhost"
-	DB_PORT = "5432"
-	
-	conn = get_db_connection(DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT)
-	cur = conn.cursor()
-	
-	# Prepare all the questions
-	questions = [
-		"1. How many entries applied for Fall 2025?",
-		"2. Percentage of entries from international students (to 2 decimal places)",
-		"3. Average GPA, GRE, GRE V, GRE AW of applicants who provided them",
-		"4. Average GPA of American students in Fall 2025",
-		"5. Percent of Fall 2025 entries that are Acceptances",
-		"6. Average GPA of Fall 2025 Acceptances",
-		"7. How many entries for JHU MS CS applicants",
-		"8. How many 2025 PhD CS acceptances at Georgetown",
-		# Additional curiosity-driven questions
-		"9. Which university has the most applicants overall?",
-		"10. What is the most common program applicants apply to?"
-	]
-
-	# Prepare all the sql queries corresponding to the questions
-	query1 = """
-			SELECT COUNT(*) 
-			FROM applicants
-			WHERE term ILIKE '%Fall 2025%';
-		"""
-	query2 = """
-			SELECT 
-				ROUND(
-				100.0 * COUNT(*) FILTER (WHERE us_or_international ILIKE '%International%') 
-				/ NULLIF(COUNT(*), 0), 
-				2
-			) AS pct_international
-			FROM applicants;
-		"""
-	query3 = """
-			SELECT 
-				ROUND(AVG(gpa)::numeric, 2) AS avg_gpa,
-				ROUND(AVG(gre)::numeric, 2) AS avg_gre,
-				ROUND(AVG(gre_v)::numeric, 2) AS avg_gre_v,
-				ROUND(AVG(gre_aw)::numeric, 2) AS avg_gre_aw
-			FROM applicants;
-		"""
-	query4 = """
-			SELECT ROUND(AVG(gpa)::numeric, 2) AS avg_gpa
-			FROM applicants
-			WHERE term ILIKE '%Fall 2025%'
-			  AND us_or_international ILIKE '%American%';
-		"""
-	query5 = """
-			SELECT ROUND(
-				100.0 * COUNT(*) FILTER (WHERE status ILIKE '%Accept%')
-				/ NULLIF(COUNT(*), 0),
-				2
-			) AS pct_acceptances
-			FROM applicants
-			WHERE term ILIKE '%Fall 2025%';
-		"""
-	query6 = """
-			SELECT ROUND(AVG(gpa)::numeric, 2) AS avg_gpa
-			FROM applicants
-			WHERE term ILIKE '%Fall 2025%'
-			  AND status ILIKE '%Accept%';
-		"""
-	query7 = """
-			SELECT COUNT(*)
-			FROM applicants
-			WHERE llm_generated_university ILIKE '%Johns Hopkins%'
-			  AND llm_generated_program ILIKE '%Computer Science%'
-			  AND degree ILIKE '%Master%';
-		"""
-	query8 = """
-			SELECT COUNT(*)
-			FROM applicants
-			WHERE llm_generated_university ILIKE '%Georgetown%'
-			  AND llm_generated_program ILIKE '%Computer Science%'
-			  AND degree ILIKE '%PhD%'
-			  AND term ILIKE '%2025%'
-			  AND status ILIKE '%Accept%';
-		"""
-	query9 = """
-			SELECT llm_generated_university, COUNT(*) AS num_apps
-			FROM applicants
-			GROUP BY llm_generated_university
-			ORDER BY num_apps DESC
-			LIMIT 1;
-		"""
-	query10 = """
-			SELECT llm_generated_program, COUNT(*) AS num_apps
-			FROM applicants
-			GROUP BY llm_generated_program
-			ORDER BY num_apps DESC
-			LIMIT 1;
-		"""
-	
-	# Make a list of the queries for easy index reference later
-	sql_queries = [
-		query1,
-		query2,
-		query3,
-		query4,
-		query5,
-		query6,
-		query7,
-		query8,
-		query9,
-		query10
-	]
-
-	# Execute queries one by one, and store question and corresponding answer in a dictionary to give to frontend pg
-	question_answer = {}
-	for i in range(len(questions)):
-		cur.execute(sql_queries[i])
-		
-		rows = cur.fetchall()
-		if not rows or rows[0][0] is None:
-			question_answer[questions[i]] = "No results found."
-			# print("   No results found.")
-		
-		# If only one row and one column, print scalar
-		if len(rows) == 1 and len(rows[0]) == 1:
-			answer = f"{rows[0][0]}"
-			question_answer[questions[i]] = answer
-			# print(f"   {rows[0][0]}")
-		else:
-			# Print rows
-			question_answer[questions[i]] = ""
-			for row in rows:
-				answer = " | ".join(str(val) if val is not None else "NULL" for val in row)
-				question_answer[questions[i]] += answer
-				# print("   " + " | ".join(str(val) if val is not None else "NULL" for val in row))
-	
-	cur.close()
-	conn.close()
-	
-	return question_answer
+    globals()["is_scraping"] = flag
 
 
-@app.route('/', methods=('GET', 'POST'))
+def _update_latest_analysis(payload: QuestionAnswers) -> None:
+    """Persist the latest analysis snapshot for reuse across requests.
+
+    :param QuestionAnswers payload: Mapping of question labels to answers.
+    :return: ``None``
+    :rtype: None
+    """
+
+    globals()["latest_analysis"] = dict(payload)
+
+
+def _database_url() -> str:
+    """Return the configured database URL.
+
+    :return: Database connection string sourced from application config.
+    :rtype: str
+    """
+
+    return DB_CONFIG["database_url"]
+
+
+def get_db_connection(database_url: str) -> psycopg.Connection:
+    """Create a psycopg connection using the provided credentials.
+
+    :param str database_url: Connection string targeting the reporting database.
+    :return: Active psycopg connection instance.
+    :rtype: psycopg.Connection
+    """
+
+    return connect(database_url=database_url)
+
+
+def get_queries() -> QuestionAnswers:
+    """Compute the formatted answers for each dashboard analysis question.
+
+    :return: Mapping of formatted question labels to rendered answers.
+    :rtype: QuestionAnswers
+    """
+
+    database_url = _database_url()
+    connection = get_db_connection(database_url)
+
+    with managed_connection(connection) as connection_ctx:
+        with managed_cursor(connection_ctx) as cursor:
+            results: QuestionAnswers = {}
+
+            for question_idx, (question, query) in enumerate(QUESTION_QUERIES, start=1):
+                label = f"{question_idx}. {question}"
+                cursor.execute(query)
+                rows = cursor.fetchall()
+
+                if not rows or rows[0][0] is None:
+                    results[label] = "No results found."
+                    continue
+
+                if len(rows) == 1 and len(rows[0]) == 1:
+                    results[label] = f"{rows[0][0]}"
+                    continue
+
+                results[label] = "\n".join(
+                    " | ".join(str(value) if value is not None else "NULL" for value in row)
+                    for row in rows
+                )
+
+    _update_latest_analysis(results)
+    return results
+
+
+@app.route("/", methods=("GET", "POST"))
 def index():
-	"""Handle both GET and POST requests for the dashboard view.
+    """Render the dashboard, handling optional scrape or refresh postbacks.
 
-	GET requests render the latest cached or freshly computed analysis. POST
-	requests process ``Pull Data`` (``scrape``) or ``Update Analysis`` (``refresh``)
-	actions.
+    :return: Tuple pairing the rendered template and HTTP status code.
+    :rtype: tuple[flask.wrappers.Response | str, int]
+    """
 
-	:return: Rendered template and HTTP status code tuple.
-	:rtype: tuple[flask.Response, int]
-	"""
-	global is_scraping #, latest_analysis
-	DB_NAME = "gradcafe"
-	DB_USER = "postgres"
-	DB_PASSWORD = "abc123"
-	DB_HOST = "localhost"
-	DB_PORT = "5432" 
+    message = None
+    question_answer: QuestionAnswers = {}
+    status_code = 200
+    database_url = _database_url()
 
-	msg = None
-	question_answer = {}
-	status_code = 200
+    if request.method == "POST":
+        action = request.form.get("action")
 
-	# When user clicks pull data, this will fetch the latest data and then save it in the DB's applicants table
-	if request.method == 'POST':
-		action = request.form.get("action")
+        if action == "scrape":
+            if is_scraping:
+                message = "Scraping already in progress. Please wait."
+                status_code = 409
+                question_answer = dict(latest_analysis)
+            else:
+                _set_scraping(True)
+                try:
+                    main()
+                    load_json_to_db(data_file, database_url)
 
-		if action == "scrape":
-			if is_scraping:
-				msg = "Scraping already in progress. Please wait."
-				status_code = 409
-				# question_answer = latest_analysis or {}
-			else:
-				is_scraping = True
-				conn = None
-				cur = None
-				try:
-					# Scrape and update database
+                    with managed_connection(
+                        get_db_connection(database_url)
+                    ) as connection_ctx:
+                        with managed_cursor(connection_ctx) as cursor:
+                            cursor.execute(
+                                """
+                                SELECT COUNT(*) FROM applicants;
+                                """
+                            )
+                            print("Total applicants in DB:", cursor.fetchone()[0])
 
-					# Using modified main.py from module 2 to scrape/clean new data + merge it with existing
-					main()
+                    question_answer = get_queries()
+                    message = "Data pulled successfully!"
+                finally:
+                    _set_scraping(False)
 
-					# Load JSON data with new entries into applicants table
-					load_json_to_db(data_file, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT)
+        elif action == "refresh":
+            if is_scraping:
+                message = "Cannot update analysis: Pull Data is running."
+                status_code = 409
+                question_answer = dict(latest_analysis)
+            else:
+                question_answer = get_queries()
+                message = "Analysis refreshed with latest database results."
 
-					# Check if count of entries increased
-					conn = get_db_connection(DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, DB_PORT)
-					cur = conn.cursor()
-					cur.execute(
-						"""
-						SELECT COUNT(*) FROM applicants;
-						"""
-					)
-					print("Total applicants in DB:", cur.fetchone()[0])
+    if not question_answer and status_code == 200:
+        question_answer = latest_analysis or get_queries()
 
-					# question_answer = get_queries()
-					# latest_analysis = question_answer
-					msg = "Data pulled successfully!"
-				finally:
-					is_scraping = False
-					if cur is not None:
-						cur.close()
-					if conn is not None:
-						conn.close()
-
-		elif action == "refresh":
-			if is_scraping:
-				msg = "Cannot update analysis: Pull Data is running."
-				status_code = 409
-				# question_answer = latest_analysis or {}
-			else:
-				question_answer = get_queries()  # re-run queries only
-				# latest_analysis = question_answer
-				msg = "Analysis refreshed with latest database results."
-	
-	# If no queries have been run yet (initial GET or after scrape), fetch them
-	# Do analysis for what's in the database and pass the returned question_answer dict to render_template below
-	if not question_answer and status_code == 200:
-		question_answer = get_queries()
-		# latest_analysis = question_answer
-	# elif not question_answer:
-		# question_answer = latest_analysis or {}
-
-	return render_template('index.html', question_answer=question_answer, msg=msg), status_code
+    return render_template("index.html", question_answer=question_answer, msg=message), status_code
 
 
-if __name__ == '__main__':
-	app.run(host='0.0.0.0', port=8080, debug=True)
+if __name__ == "__main__":  # pragma: no cover - manual execution entry point
+    app.run(host="0.0.0.0", port=8080, debug=True)

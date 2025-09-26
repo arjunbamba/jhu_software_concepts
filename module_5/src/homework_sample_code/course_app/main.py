@@ -1,73 +1,99 @@
-from scrape import Scraper
-from clean import Cleaner
+"""Entrypoint for scraping and cleaning GradCafe admissions data."""
+
+from __future__ import annotations
+
 import json
-import os
+import sys
+from pathlib import Path
+from typing import Iterable, List, Mapping
 
-parent_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
-data_file = os.path.join(parent_dir, "llm_extend_applicant_data.json")
+try:
+    from homework_sample_code.course_app.utils import ensure_src_on_path, import_module
+except ModuleNotFoundError:  # pragma: no cover - fallback for ``python main.py``
+    sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
+    from homework_sample_code.course_app.utils import ensure_src_on_path, import_module
 
-def save_data(data, filename=data_file):
+ensure_src_on_path()
+
+scrape_module = import_module("homework_sample_code.course_app.scrape")
+clean_module = import_module("homework_sample_code.course_app.clean")
+
+Scraper = scrape_module.Scraper
+Cleaner = clean_module.Cleaner
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+DATA_FILE = PROJECT_ROOT / "llm_extend_applicant_data.json"
+
+
+def save_data(data: List[Mapping[str, str]], filename: Path = DATA_FILE) -> None:
     """Persist cleaned applicant data to disk.
 
-    :param list[dict] data: Sequence of cleaned applicant records that should be
-        written.
-    :param str filename: Destination JSON file. Defaults to
-        :data:`data_file` in the project root.
+    :param list data: Serialisable list of applicant mappings.
+    :param pathlib.Path filename: Target path for the JSON payload.
     :return: ``None``
     :rtype: None
     """
-    with open(filename, "w", encoding="utf-8") as f:
-        json.dump(data, f, indent=4, ensure_ascii=False)
+
+    with filename.open("w", encoding="utf-8") as json_file:
+        json.dump(data, json_file, indent=4, ensure_ascii=False)
     print(f"STATUS: Data saved to {filename}")
 
 
-def load_data(filename=data_file):
+def load_data(filename: Path = DATA_FILE) -> List[Mapping[str, str]]:
     """Load previously cleaned applicant data from disk.
 
-    :param str filename: JSON file to read. Defaults to :data:`data_file`.
-    :return: Parsed JSON document representing cleaned applicant entries.
-    :rtype: list[dict]
+    :param pathlib.Path filename: File location containing the JSON payload.
+    :return: List of applicant mappings, possibly empty.
+    :rtype: list[Mapping[str, str]]
     """
-    if not os.path.exists(filename):
+
+    if not filename.exists():
         return []
-    with open(filename, "r", encoding="utf-8") as f:
-        data = json.load(f)
-    return data
+    with filename.open("r", encoding="utf-8") as json_file:
+        return json.load(json_file)
 
 
-def main():
+def _merge_entries(
+    existing_entries: Iterable[Mapping[str, str]],
+    new_entries: Iterable[Mapping[str, str]],
+) -> List[Mapping[str, str]]:
+    """Combine the existing dataset with freshly cleaned entries.
+
+    :param Iterable existing_entries: Iterable of previously stored applicants.
+    :param Iterable new_entries: Iterable containing the latest scraped applicants.
+    :return: Concatenated list of applicant dictionaries.
+    :rtype: list[Mapping[str, str]]
+    """
+
+    return list(existing_entries) + list(new_entries)
+
+
+def main(max_entries: int = 30000) -> None:
     """Scrape, clean, and merge the latest GradCafe entries into the dataset.
 
-    Existing cleaned records are reloaded from disk, new raw entries are fetched
-    via :class:`~homework_sample_code.course_app.scrape.Scraper`, transformed by
-    :class:`~homework_sample_code.course_app.clean.Cleaner`, and the combined
-    dataset is saved back to :data:`data_file`.
-
+    :param int max_entries: Maximum number of new records to scrape in this run.
     :return: ``None``
     :rtype: None
     """
+
     existing_cleaned = load_data()
-    existing_urls = {d.get("url", "") for d in existing_cleaned if d.get("url")}
+    existing_urls = {entry.get("url", "") for entry in existing_cleaned if entry.get("url")}
 
     print(f"Loaded {len(existing_cleaned)} existing entries.")
 
-    # Scrape new data only
-    scraper = Scraper(max_entries=30000)  # can still cap max
-    raw_data = scraper.scrape_data(existing_urls=existing_urls)
+    scraper = Scraper(max_entries=max_entries)
+    raw_entries = scraper.scrape_data(existing_urls=existing_urls)
+    print(f"Scraped {len(raw_entries)} NEW raw entries.")
 
-    print(f"Scraped {len(raw_data)} NEW raw entries.")
+    cleaner = Cleaner(raw_data=raw_entries)
+    cleaned_entries = cleaner.clean_data()
+    print(f"Cleaned {len(cleaned_entries)} NEW entries.")
 
-    # Clean only the new raw data
-    cleaner = Cleaner(raw_data=raw_data)
-    new_cleaned = cleaner.clean_data()
-
-    print(f"Cleaned {len(new_cleaned)} NEW entries.")
-
-    # Merge old + new, then save
-    combined = existing_cleaned + new_cleaned
+    combined = _merge_entries(existing_cleaned, cleaned_entries)
     save_data(combined)
     print(f"Total entries after merge: {len(combined)}")
 
 
-if __name__ == "__main__":
+if __name__ == "__main__":  # pragma: no cover - manual execution entry point
     main()
