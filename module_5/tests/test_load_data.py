@@ -1,9 +1,18 @@
-import json
+"""Unit tests for the data loading helpers."""
+
+# pylint: disable=too-few-public-methods,missing-class-docstring,missing-function-docstring
+
+from __future__ import annotations
+
 from types import SimpleNamespace
 
 import pytest
+from psycopg.conninfo import conninfo_to_dict
 
-import load_data
+from tests.conftest import normalize_sql
+from tests.import_utils import import_module
+
+load_data = import_module("load_data")
 
 
 @pytest.mark.db
@@ -15,22 +24,17 @@ def test_create_connection_success(monkeypatch, capsys):
 
     captured_kwargs = {}
 
-    def fake_connect(**kwargs):
-        captured_kwargs.update(kwargs)
+    def fake_connect(*, database_url):
+        captured_kwargs["database_url"] = database_url
         return DummyConnection()
 
-    monkeypatch.setattr(load_data.psycopg, "connect", fake_connect)
+    monkeypatch.setattr(load_data, "connect", fake_connect)
 
-    conn = load_data.create_connection("gradcafe", "postgres", "abc123", "localhost", "5432")
+    database_url = "postgresql://postgres:abc123@localhost:5432/gradcafe"
+    conn = load_data.create_connection(database_url)
 
     assert isinstance(conn, DummyConnection)
-    assert captured_kwargs == {
-        "dbname": "gradcafe",
-        "user": "postgres",
-        "password": "abc123",
-        "host": "localhost",
-        "port": "5432",
-    }
+    assert captured_kwargs == {"database_url": database_url}
     assert "Connection to PostgreSQL DB successful" in capsys.readouterr().out
 
 
@@ -41,9 +45,9 @@ def test_create_connection_handles_operational_error(monkeypatch, capsys):
     def fake_connect(**_kwargs):
         raise load_data.OperationalError("boom")
 
-    monkeypatch.setattr(load_data.psycopg, "connect", fake_connect)
+    monkeypatch.setattr(load_data, "connect", fake_connect)
 
-    conn = load_data.create_connection("gradcafe", "postgres", "abc123", "localhost", "5432")
+    conn = load_data.create_connection("postgresql://postgres:abc123@localhost:5432/gradcafe")
 
     assert conn is None
     captured = capsys.readouterr().out
@@ -58,9 +62,11 @@ def test_execute_query_executes_and_closes_cursor(capsys):
         def __init__(self):
             self.executed = []
             self.closed = False
+            self.query = None
 
         def execute(self, query):
             self.executed.append(query)
+            self.query = query
 
         def close(self):
             self.closed = True
@@ -87,26 +93,29 @@ def test_execute_query_executes_and_closes_cursor(capsys):
 def test_setup_database_runs_create_query(monkeypatch):
     """setup_database should create a postgres connection, run CREATE DATABASE, and close it."""
 
-    calls = SimpleNamespace(connect_args=None, executed_query=None, closed=False)
+    calls = SimpleNamespace(connect_url=None, executed_query=None, closed=False)
 
     class DummyConnection:
         def close(self):
             calls.closed = True
 
-    def fake_create_connection(db_name, user, password, host, port):
-        calls.connect_args = (db_name, user, password, host, port)
+    def fake_create_connection(database_url):
+        calls.connect_url = database_url
         return DummyConnection()
 
-    def fake_execute(connection, query):
+    def fake_execute(_connection, query):
         calls.executed_query = query
 
     monkeypatch.setattr(load_data, "create_connection", fake_create_connection)
     monkeypatch.setattr(load_data, "execute_query", fake_execute)
 
-    load_data.setup_database("postgres", "abc123", "localhost", "5432")
+    target_url = "postgresql://postgres:abc123@localhost:5432/gradcafe"
+    load_data.setup_database(target_url)
 
-    assert calls.connect_args == ("postgres", "postgres", "abc123", "localhost", "5432")
-    assert "CREATE DATABASE gradcafe" in calls.executed_query
+    info = conninfo_to_dict(calls.connect_url)
+    assert info["dbname"] == "postgres"
+    assert info["host"] == "localhost"
+    assert "CREATE DATABASE gradcafe" in normalize_sql(calls.executed_query)
     assert calls.closed is True
 
 
@@ -114,26 +123,28 @@ def test_setup_database_runs_create_query(monkeypatch):
 def test_setup_table_creates_applicants_table(monkeypatch):
     """setup_table should connect to gradcafe and issue the CREATE TABLE statement."""
 
-    calls = SimpleNamespace(connect_args=None, executed_query=None, closed=False)
+    calls = SimpleNamespace(connect_url=None, executed_query=None, closed=False)
 
     class DummyConnection:
         def close(self):
             calls.closed = True
 
-    def fake_create_connection(db_name, user, password, host, port):
-        calls.connect_args = (db_name, user, password, host, port)
+    def fake_create_connection(database_url):
+        calls.connect_url = database_url
         return DummyConnection()
 
-    def fake_execute(connection, query):
+    def fake_execute(_connection, query):
         calls.executed_query = query
 
     monkeypatch.setattr(load_data, "create_connection", fake_create_connection)
     monkeypatch.setattr(load_data, "execute_query", fake_execute)
 
-    load_data.setup_table("postgres", "abc123", "localhost", "5432")
+    target_url = "postgresql://postgres:abc123@localhost:5432/gradcafe"
+    load_data.setup_table(target_url)
 
-    assert calls.connect_args[0] == "gradcafe"
-    assert "CREATE TABLE IF NOT EXISTS applicants" in calls.executed_query
+    info = conninfo_to_dict(calls.connect_url)
+    assert info["dbname"] == "gradcafe"
+    assert "CREATE TABLE IF NOT EXISTS applicants" in normalize_sql(calls.executed_query)
     assert calls.closed is True
 
 
@@ -153,6 +164,9 @@ def test_load_data_orchestrates_pipeline(monkeypatch, capsys):
         call_order.append(("load_json_to_db", path))
 
     class DummyCursor:
+        def __init__(self):
+            self.query = None
+
         def __enter__(self):
             return self
 
@@ -177,8 +191,8 @@ def test_load_data_orchestrates_pipeline(monkeypatch, capsys):
 
     connections = []
 
-    def fake_create_connection(db_name, *_args, **_kwargs):
-        connections.append(db_name)
+    def fake_create_connection(database_url, *_args, **_kwargs):
+        connections.append(conninfo_to_dict(database_url)["dbname"])
         return DummyConnection()
 
     monkeypatch.setattr(load_data, "setup_database", fake_setup_database)

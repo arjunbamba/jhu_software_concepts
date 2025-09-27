@@ -1,112 +1,39 @@
-import re
-import textwrap
+"""Tests for the query output helper module."""
+
+from __future__ import annotations
 
 import pytest
 
-import query_data
+# pylint: disable=redefined-outer-name
 
-QUERY1 = textwrap.dedent(
-    """
-    SELECT COUNT(*)
-    FROM applicants
-    WHERE term ILIKE '%Fall 2025%';
-    """
+from tests.conftest import normalize_sql
+from tests.import_utils import import_module
+from tests.query_constants import (
+    QUERY_AVG_ACCEPT_GPA,
+    QUERY_AVG_AMERICAN,
+    QUERY_AVG_SCORES,
+    QUERY_COUNT_FALL,
+    QUERY_GEORGETOWN_PHD,
+    QUERY_JHU_MS,
+    QUERY_PERCENT_ACCEPT,
+    QUERY_PERCENT_INTERNATIONAL,
+    QUERY_TOP_PROGRAM,
+    QUERY_TOP_UNIVERSITY,
 )
 
-QUERY2 = textwrap.dedent(
-    """
-    SELECT
-        ROUND(
-            100.0 * COUNT(*) FILTER (WHERE us_or_international ILIKE '%International%')
-            / NULLIF(COUNT(*), 0),
-            2
-        ) AS pct_international
-    FROM applicants;
-    """
-)
+query_data = import_module("query_data")
+DATABASE_URL = query_data.DEFAULT_DB_CONFIG["database_url"]
 
-QUERY3 = textwrap.dedent(
-    """
-    SELECT
-        ROUND(AVG(gpa)::numeric, 2) AS avg_gpa,
-        ROUND(AVG(gre)::numeric, 2) AS avg_gre,
-        ROUND(AVG(gre_v)::numeric, 2) AS avg_gre_v,
-        ROUND(AVG(gre_aw)::numeric, 2) AS avg_gre_aw
-    FROM applicants;
-    """
-)
-
-QUERY4 = textwrap.dedent(
-    """
-    SELECT ROUND(AVG(gpa)::numeric, 2) AS avg_gpa
-    FROM applicants
-    WHERE term ILIKE '%Fall 2025%'
-      AND us_or_international ILIKE '%American%';
-    """
-)
-
-QUERY5 = textwrap.dedent(
-    """
-    SELECT ROUND(
-        100.0 * COUNT(*) FILTER (WHERE status ILIKE '%Accept%')
-        / NULLIF(COUNT(*), 0),
-        2
-    ) AS pct_acceptances
-    FROM applicants
-    WHERE term ILIKE '%Fall 2025%';
-    """
-)
-
-QUERY6 = textwrap.dedent(
-    """
-    SELECT ROUND(AVG(gpa)::numeric, 2) AS avg_gpa
-    FROM applicants
-    WHERE term ILIKE '%Fall 2025%'
-      AND status ILIKE '%Accept%';
-    """
-)
-
-QUERY7 = textwrap.dedent(
-    """
-    SELECT COUNT(*)
-    FROM applicants
-    WHERE llm_generated_university ILIKE '%Johns Hopkins%'
-      AND llm_generated_program ILIKE '%Computer Science%'
-      AND degree ILIKE '%Master%';
-    """
-)
-
-QUERY8 = textwrap.dedent(
-    """
-    SELECT COUNT(*)
-    FROM applicants
-    WHERE llm_generated_university ILIKE '%Georgetown%'
-      AND llm_generated_program ILIKE '%Computer Science%'
-      AND degree ILIKE '%PhD%'
-      AND term ILIKE '%2025%'
-      AND status ILIKE '%Accept%';
-    """
-)
-
-QUERY9 = textwrap.dedent(
-    """
-    SELECT llm_generated_university, COUNT(*) AS num_apps
-    FROM applicants
-    GROUP BY llm_generated_university
-    ORDER BY num_apps DESC
-    LIMIT 1;
-    """
-)
-
-QUERY10 = textwrap.dedent(
-    """
-    SELECT llm_generated_program, COUNT(*) AS num_apps
-    FROM applicants
-    GROUP BY llm_generated_program
-    ORDER BY num_apps DESC
-    LIMIT 1;
-    """
-)
+QUERY1 = QUERY_COUNT_FALL
+QUERY2 = QUERY_PERCENT_INTERNATIONAL
+QUERY3 = QUERY_AVG_SCORES
+QUERY4 = QUERY_AVG_AMERICAN
+QUERY5 = QUERY_PERCENT_ACCEPT
+QUERY6 = QUERY_AVG_ACCEPT_GPA
+QUERY7 = QUERY_JHU_MS
+QUERY8 = QUERY_GEORGETOWN_PHD
+QUERY9 = QUERY_TOP_UNIVERSITY
+QUERY10 = QUERY_TOP_PROGRAM
 
 
 ALL_QUERIES = [
@@ -122,24 +49,26 @@ ALL_QUERIES = [
     QUERY10,
 ]
 
-
-def normalize(sql: str) -> str:
-    return " ".join(sql.strip().split())
-
-
 @pytest.fixture
 def populated_query_db(query_db):
+    """Provide a scripted database populated with deterministic query results.
+
+    :param tests.conftest.MockDatabase query_db: Database double seeded by fixtures.
+    :return: Database configured to return canned responses.
+    :rtype: tests.conftest.MockDatabase
+    """
+
     script = {
-        QUERY1: [(5,)],
-        QUERY2: [(47.50,)],
-        QUERY3: [(3.55, 321.0, 159.0, 4.2)],
-        QUERY4: [(3.60,)],
-        QUERY5: [(66.67,)],
-        QUERY6: [(3.75,)],
-        QUERY7: [(4,)],
-        QUERY8: [(2,)],
-        QUERY9: [("Top University", 23)],
-        QUERY10: [("Top Program", 41)],
+        normalize_sql(QUERY1): [(5,)],
+        normalize_sql(QUERY2): [(47.50,)],
+        normalize_sql(QUERY3): [(3.55, 321.0, 159.0, 4.2)],
+        normalize_sql(QUERY4): [(3.60,)],
+        normalize_sql(QUERY5): [(66.67,)],
+        normalize_sql(QUERY6): [(3.75,)],
+        normalize_sql(QUERY7): [(4,)],
+        normalize_sql(QUERY8): [(2,)],
+        normalize_sql(QUERY9): [("Top University", 23)],
+        normalize_sql(QUERY10): [("Top Program", 41)],
     }
     query_db.set_script(script)
     return query_db
@@ -147,8 +76,14 @@ def populated_query_db(query_db):
 
 @pytest.mark.db
 def test_run_queries_outputs_expected_values(populated_query_db, capsys):
-    """Run run_queries against scripted results and assert printed content and query count."""
-    query_data.run_queries("gradcafe", "postgres", "abc", "localhost", "5432")
+    """Validate that ``run_queries`` prints the expected aggregated results.
+
+    :param tests.conftest.MockDatabase populated_query_db: Database seeded with canned answers.
+    :param _pytest.capture.CaptureFixture capsys: Pytest capture helper monitoring stdout.
+    :return: ``None``
+    :rtype: None
+    """
+    query_data.run_queries(DATABASE_URL)
 
     out = capsys.readouterr().out
 
@@ -163,15 +98,28 @@ def test_run_queries_outputs_expected_values(populated_query_db, capsys):
 
 @pytest.fixture
 def empty_result_query_db(query_db):
-    script = {query: [] for query in ALL_QUERIES}
+    """Provide a scripted database where every query yields an empty result set.
+
+    :param tests.conftest.MockDatabase query_db: Database double reused across fixtures.
+    :return: Database scripted to return empty lists for all queries.
+    :rtype: tests.conftest.MockDatabase
+    """
+
+    script = {normalize_sql(query): [] for query in ALL_QUERIES}
     query_db.set_script(script)
     return query_db
 
 
 @pytest.mark.db
 def test_run_queries_handles_no_results(empty_result_query_db, capsys):
-    """Verify run_queries prints fallback text when every query returns no rows."""
-    query_data.run_queries("gradcafe", "postgres", "abc", "localhost", "5432")
+    """Ensure ``run_queries`` emits fallback output when datasets are empty.
+
+    :param tests.conftest.MockDatabase empty_result_query_db: Database returning no rows.
+    :param _pytest.capture.CaptureFixture capsys: Pytest capture helper monitoring stdout.
+    :return: ``None``
+    :rtype: None
+    """
+    query_data.run_queries(DATABASE_URL)
 
     out = capsys.readouterr().out
 
@@ -180,5 +128,6 @@ def test_run_queries_handles_no_results(empty_result_query_db, capsys):
     assert len(empty_result_query_db.queries) == len(ALL_QUERIES)
 
     # ensure scalar formatting does not throw even on empty results
+    normalized_queries = [normalize_sql(sql) for sql, _ in empty_result_query_db.queries]
     for query in ALL_QUERIES:
-        assert normalize(query) in [sql for sql, _ in empty_result_query_db.queries]
+        assert normalize_sql(query) in normalized_queries
