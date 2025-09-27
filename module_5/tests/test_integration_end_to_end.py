@@ -1,3 +1,5 @@
+"""End-to-end workflow tests covering scrape, refresh, and rendering."""
+
 import pytest
 
 

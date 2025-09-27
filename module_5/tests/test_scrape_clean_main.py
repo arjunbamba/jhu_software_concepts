@@ -1,12 +1,24 @@
+"""Integration tests covering scraping, cleaning, and persistence."""
+
+# pylint: disable=too-few-public-methods,redefined-outer-name
+
+from __future__ import annotations
+
 import json
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
-from homework_sample_code.course_app.clean import Cleaner
-from homework_sample_code.course_app.main import load_data, main as run_main, save_data
-from homework_sample_code.course_app.scrape import Scraper
+from tests.import_utils import import_module
+
+Cleaner = import_module("homework_sample_code.course_app.clean").Cleaner
+scrape_module = import_module("homework_sample_code.course_app.scrape")
+main_module = import_module("homework_sample_code.course_app.main")
+
+Scraper = scrape_module.Scraper
+run_main = main_module.main
+load_data = main_module.load_data
 
 
 SCRAPE_HTML = """
@@ -31,6 +43,7 @@ SCRAPE_HTML = """
 
 
 def fake_html_fetch(_self, url):
+    """Return canned HTML for the first page and empty for subsequent calls."""
     if "page=1" in url:
         return SCRAPE_HTML
     return ""
@@ -93,6 +106,7 @@ def test_cleaner_transforms_raw_entries():
 
 @pytest.fixture
 def main_environment(monkeypatch, tmp_path):
+    """Provide a fully stubbed environment for running ``main``."""
     data_file = tmp_path / "llm_extend_applicant_data.json"
     data_file.write_text(json.dumps([
         {
@@ -103,10 +117,10 @@ def main_environment(monkeypatch, tmp_path):
     ]))
 
     class FakeScraper(Scraper):
-        def __init__(self, *args, **kwargs):
-            super().__init__(*args, **kwargs)
+        """Scraper stub that returns a single canned entry."""
 
-        def scrape_data(self, existing_urls=None):
+        def scrape_data(self, existing_urls=None):  # pylint: disable=unused-argument
+            """Return canned raw entries regardless of input URLs."""
             return [
                 {
                     "program_raw": "Computer Science",
@@ -123,6 +137,7 @@ def main_environment(monkeypatch, tmp_path):
     monkeypatch.setattr("homework_sample_code.course_app.main.Scraper", FakeScraper)
 
     def fake_load(filename=str(data_file)):
+        """Load JSON from the temporary fixture file."""
         with open(filename, "r", encoding="utf-8") as fh:
             return json.load(fh)
 
@@ -131,6 +146,7 @@ def main_environment(monkeypatch, tmp_path):
     saved_payload = {}
 
     def fake_save(data, filename=str(data_file)):
+        """Capture saved payloads for assertions."""
         saved_payload["data"] = data
         saved_payload["filename"] = filename
 
@@ -138,7 +154,8 @@ def main_environment(monkeypatch, tmp_path):
 
     yield SimpleNamespace(data_file=str(data_file), saved=saved_payload)
 
-    load_data.cache_clear() if hasattr(load_data, "cache_clear") else None
+    if hasattr(load_data, "cache_clear"):
+        load_data.cache_clear()
 
 
 @pytest.mark.integration
