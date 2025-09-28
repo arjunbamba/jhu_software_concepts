@@ -111,6 +111,12 @@ snyk test
 ![snyk-analysis](/module_5/snyk-analysis.png)
 - There were no vulnerabilities found in my Snyk test run, so my project is free from any malicious packages.
 
+#### Verify Flask/Analysis Webpage Working
+Navigate to `module_5/src/homework_sample_code/course_app/`.
+
+Now run the app locally via: `python app.py`. In your browser, go to `localhost:8080`, and you should see the following webpage:
+
+![working_flask](/module_5/Screenshots/module_5/working_flask.jpg)
 
 ### 4. Run Project (guidelines from module 3)
 
