@@ -13,6 +13,7 @@
     - [Run Coverage Test](#run-coverage-test)
     - [Run Complete Test Suite](#run-complete-test-suite)
     - [Snyk Analysis Verification](#snyk-analysis-verification)
+    - [Verify Flask/Analysis Webpage Working](#verify-flaskanalysis-webpage-working)
   - [4. Run Project (guidelines from module 3)](#4-run-project-guidelines-from-module-3)
     - [Run Database Setup + Data Load](#run-database-setup--data-load)
     - [Run Queries (to view data analysis)](#run-queries-to-view-data-analysis)
